@@ -4,7 +4,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, defineEmits, withDefaults, watch } from 'vue';
+import { ref, onMounted, withDefaults, defineModel } from 'vue';
 import * as monaco from 'monaco-editor';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
@@ -17,23 +17,24 @@ import type {editor as EditorType} from 'monaco-editor/esm/vs/editor/editor.api'
 interface CodeEditorProps {
   theme?: string;
   language?: "typescript" | "json";
-  modelValue?: string;
-}
+};
 
 // 组件props
 const props = withDefaults(defineProps<CodeEditorProps>(), {
   theme: 'vs-dark',
   language: 'json',
-})
+});
+const code = defineModel('code', {
+  type: String,
+  default: ''
+});
 // 组件事件
 const componentEvent = defineEmits<{
   change: [code: string], // 代码内容
-  'update:modelValue': [value: string]
 }>()
 
 const codeEditor = ref(null as unknown as HTMLElement);
 const editor = ref(null as unknown as EditorType.IStandaloneCodeEditor);
-
 
 self.MonacoEnvironment = {
   getWorker(_, label) {
@@ -57,17 +58,44 @@ self.MonacoEnvironment = {
 onMounted(() => {
   // 创建编辑器
   const monacoEditor =  monaco.editor.create(codeEditor.value, {
-    value: props.modelValue || '',
+    value: code.value || '',
     language: props.language,
     theme: props.theme,
+    tabSize: 2,
     automaticLayout: true,
   });
 
+  if(props.language === 'json') {
+    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+      validate: true,
+      schemas: [],
+      enableSchemaRequest: false,
+      allowComments: true,
+      trailingCommas: 'ignore',
+    });
+    monaco.languages.json.jsonDefaults.setModeConfiguration({
+      documentFormattingEdits: true,
+      documentRangeFormattingEdits: true,
+      completionItems: true,
+      hovers: true,
+      documentSymbols: true,
+      tokens: true,
+      colors: true,
+      foldingRanges: true,
+      diagnostics: true,
+      selectionRanges: true,
+    });
+  }
+
   // 数据绑定
   monacoEditor.getModel()?.onDidChangeContent(() => {
-    const code = monacoEditor.getValue();
-    componentEvent('change', code);
-    componentEvent('update:modelValue', code);
+    const value = monacoEditor.getValue();
+    code.value = value;
+  });
+
+  monacoEditor.onDidBlurEditorText(() => {
+    const value = monacoEditor.getValue();
+    componentEvent('change', value);
   });
 
   editor.value = monacoEditor;

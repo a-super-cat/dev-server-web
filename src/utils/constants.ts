@@ -1,5 +1,6 @@
 import type { MenuItem } from '@/types/common.d.ts'
 
+// 菜单项
 export const menuItems: MenuItem[] = [
   {
     path: '/',
@@ -19,4 +20,10 @@ export const menuItems: MenuItem[] = [
     icon: 'icon-a-5',
     component: () => import('@/views/ApiTest.vue'),
   }
-]
+];
+
+// 处理请求的方式
+export const mockPatternList = ['mock', 'request', 'mockJs'];
+
+// 接口请求方式
+export const requestMethodList = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];

@@ -5,9 +5,21 @@ import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import {svgSpritemap} from 'vite-plugin-svg-spritemap';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  envDir: './env',
+  envPrefix: 'APP_',
+  server: {
+    proxy: {
+      '^/api/.*': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      }
+    },
+    cors: true,
+  },
   plugins: [
     vue(),
     AutoImport({
@@ -15,6 +27,10 @@ export default defineConfig({
     }),
     Components({
       resolvers: [ElementPlusResolver()],
+    }),
+    svgSpritemap({
+      pattern: 'src/assets/svgIcons/*.svg',
+      filename: 'svgIcons.svg',
     }),
   ],
   css: {

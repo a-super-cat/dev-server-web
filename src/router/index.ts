@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
-import { menuItems } from '@/utils/constant'
+import { menuItems } from '@/utils/constants'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
