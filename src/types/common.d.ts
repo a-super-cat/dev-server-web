@@ -6,18 +6,18 @@ interface MenuItem {
 }
 
 interface MockItemBasicType {
-  mockItemId?: string;
-  apiPath?: string;
-  apiName?: string;
-  apiRemarks?: string;
+  id: string;
+  path?: string;
+  name?: string;
+  remarks?: string;
   requestMethod?: string;
   mockPattern?: string;
 }
 
 interface SceneItemType {
   [key: string]: any;
-  sceneId: string | number;
-  sceneName: string;
+  id: string | number;
+  name: string;
   responseConf?: string;
   param?: string;
 }

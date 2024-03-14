@@ -1,5 +1,5 @@
 <template>
-  <div class="search-bar-component flex px-4">
+  <div class="search-bar-component flex justify-between px-4">
     <el-form :inline="true">
       <el-form-item>
         <div class="w-96">
@@ -38,6 +38,10 @@
         <el-button @click="$emit('search', param)" type="primary">{{ t(`${i18nBase}.searchBtn`) }}</el-button>
       </el-form-item>
     </el-form>
+
+    <div class="pt-2">
+      <el-button type="primary" @click="$emit('addMockItem')">{{ t(`${i18nBase}.createNewMockItem`) }}</el-button>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
@@ -45,6 +49,7 @@ import { ref, defineModel } from 'vue';
 import { Search } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n';
 const { t }  = useI18n();
+const i18nBase = 'components.SearchBar'
 
 interface Props {
   iterativeTagList?: {label: string, value: string}[],
@@ -63,8 +68,6 @@ const param = ref({
 // TODO: 待定是否需要根据不同的搜索模式来进行搜索
 // Created by jzw on 2024-01-03
 const searchPatternList = [ 'path', 'apiName', 'apiRemarks', 'param' ]
-
-const i18nBase = 'components.SearchBar'
 
 </script>
 <style lang="scss">

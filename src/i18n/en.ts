@@ -11,13 +11,15 @@ export default {
         param: 'param'
       },
       searchBtn: 'search',
+      createNewMockItem: 'Create New MockItem',
     },
     MockItem: {
       base: {
-        apiNameLabel: 'apiName',
-        apiPathLabel: 'apiPath',
-        requestMethodLabel: 'requestMethod',
-        mockPatternLabel: 'mockPattern',
+        apiNameLabel: 'Api Name',
+        apiPathLabel: 'Api Path',
+        apiRemarksLabel: 'Api Remarks',
+        requestMethodLabel: 'Request Method',
+        mockPatternLabel: 'Mock Pattern',
         mockPatternList: {
           mock: 'Mock',
           request: 'realRequest',

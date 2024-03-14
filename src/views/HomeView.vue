@@ -4,17 +4,19 @@
     <div class="relative">
       <search-bar 
         @search="handleSearch"
+        @addMockItem="handleAddMockItem"
       />
     </div>
     
     <div class="flex-1 gap-4 flex flex-col">
       <mock-item 
         v-for="item in mockItemList"
-        :key="item.apiPath"
-        :basic-info="item.basic"
-        :scene-list="item.sceneList"
+        :key="item.basicInfo.id"
+        :basic-info="item.basicInfo"
+        :scene-list="item.scenesList"
+        @save="handleSaveMockItem"
         @sceneOperation="handleMockItemSceneOperation"
-        :selected-scene-id="mockItemAndSelectedSceneIdPair[item.basic.mockItemId]"
+        :selected-scene-id="mockItemAndSelectedSceneIdPair[item.basicInfo.id]"
       />
     </div>
     <el-drawer 
@@ -69,17 +71,19 @@
   </div>
 </template>
 <script setup lang="ts">
-import {ref, watch, onBeforeMount } from 'vue'
+import {ref, watch, onBeforeMount, } from 'vue'
 import { useI18n } from 'vue-i18n';
 import CodeEditor from '@/components/CodeEditor.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import MockItem from '@/components/MockItem.vue';
+import { ElMessage } from 'element-plus'
 import type { MockItemBasicType, SceneItemType } from '@/types/common';
 import {v4 as uuid} from 'uuid';
 import cloneDeep from 'lodash/cloneDeep';
 import JSON5 from 'json5';
 import { 
-  saveSceneItem, 
+  saveSceneItem,
+  saveMockItem,
   getMockList,
 } from '@/api/system';
 const { t }  = useI18n();
@@ -91,13 +95,7 @@ const currentEditingSceneItem = ref<SceneItemType>({} as SceneItemType);
 // 是否显示代码编辑器
 const isShowCodeEditor = ref(false);
 // mockItem列表
-const mockItemList = ref<any[]>([]);
-// 搜索参数
-const searchParm = ref({
-  searchText: '',
-  iterativeTag: '',
-  searchPattern: ['path', 'apiName'],
-});
+const mockItemList = ref<{basicInfo: MockItemBasicType, scenesList: SceneItemType[]}[]>([] as any);
 
 // 每个mockItem被选中的场景id
 const mockItemAndSelectedSceneIdPair = ref<{[key: string]: string}>({});
@@ -106,57 +104,14 @@ mockItemAndSelectedSceneIdPair.value = {
   mockItemId2: 'xxx',
 };
 
-mockItemList.value = [
-  {
-    basic: {
-      mockItemId: 'mockItemId1',
-      apiPath: '/api/v1/abc',
-      apiName: '测试mockItem1',
-      apiRemarks: '接口备注1',
-      requestMethod: 'GET',
-      mockPattern: 'mock',
-    },
-    sceneList: [
-      {
-        sceneName: '场景1',
-        sceneId: 'scene1',
-        param: "",
-        responseConf: "123",
-      },
-      {
-        sceneName: '场景2',
-        sceneId: 'scene2',
-        param: "",
-        responseConf: "456",
-      },
-    ],
-  },
-  {
-    basic: {
-      mockItemId: 'mockItemId2',
-      apiPath: '/api/v1/def',
-      apiName: '测试mockItem2',
-      apiRemarks: '接口备注2',
-      requestMethod: 'POST',
-      mockPattern: 'request',
-    },
-    sceneList: [
-      {
-        sceneName: 'xxx',
-        sceneId: 'xxx',
-        param: "",
-        responseConf: "",
-      },
-    ],
-  },
-];
+mockItemList.value = [];
 
 const handleMockItemSceneOperation = (operation: string, mockItemBasicInfo: any, sceneItem: any) => {
   switch (operation) {
     case 'add':
       currentEditingSceneItem.value = {
-        sceneId: uuid(),
-        sceneName: '',
+        id: uuid(),
+        name: '',
         param: '',
         responseConf: '',
       };
@@ -164,7 +119,7 @@ const handleMockItemSceneOperation = (operation: string, mockItemBasicInfo: any,
       console.log('add', mockItemBasicInfo);
       break;
     case 'select':
-      mockItemAndSelectedSceneIdPair.value[mockItemBasicInfo.mockItemId] = sceneItem.sceneId;
+      mockItemAndSelectedSceneIdPair.value[mockItemBasicInfo.id] = sceneItem.id;
       break;
     case 'edit':
       {
@@ -208,9 +163,30 @@ const handleSearch = (param: any) => {
   console.log('search', param);
 };
 
-watch(() => mockItemList.value, (newVal) => {
-  console.log('mockItemList change', newVal);
-}, {deep: true});
+const handleAddMockItem = () => {
+  mockItemList.value.push({
+    basicInfo: {
+      id: uuid(),
+      path: '',
+      name: '接口名',
+      remarks: '接口备注',
+      requestMethod: 'GET',
+      mockPattern: 'mock',
+    },
+    scenesList: [],
+  });
+  console.log('addMockItem');
+};
+
+const handleSaveMockItem = async (mockItemBase: MockItemBasicType) => {
+  const res = saveMockItem(mockItemBase);
+  console.log('saveMockItem', res);
+};
+
+onBeforeMount( async () => {
+  const res = await getMockList();
+  mockItemList.value = res.data;
+});
 </script>
 <style lang="scss">
   .el-drawer__body {

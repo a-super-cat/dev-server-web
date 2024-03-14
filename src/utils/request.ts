@@ -50,7 +50,7 @@ axiosInstance.interceptors.response.use(config => {
 export default axiosInstance;
 
 export function defineRequest(url: string, method = 'GET', options = {}) {
-  return (data: any) => {
+  return (data?: any) => {
     const tmp = method === 'GET' ? { params: data } : { data };
     return axiosInstance({
       ...options,

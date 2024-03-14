@@ -11,11 +11,13 @@ export default {
         param: '参数'
       },
       searchBtn: '查询',
+      createNewMockItem: '新建Mock项',
     },
     MockItem: {
       base: {
         apiNameLabel: '接口名',
         apiPathLabel: '请求路径',
+        apiRemarksLabel: '接口备注',
         requestMethodLabel: '请求方式',
         mockPatternLabel: 'Mock模式',
         mockPatternList: {
