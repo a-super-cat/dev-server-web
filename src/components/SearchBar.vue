@@ -1,5 +1,5 @@
 <template>
-  <div class="search-bar-component flex justify-between px-4">
+  <div class="search-bar-component flex justify-between px-4 py-2">
     <el-form :inline="true">
       <el-form-item>
         <div class="w-96">
@@ -10,28 +10,33 @@
           />
         </div>
       </el-form-item>
-      <el-form-item>
-        <el-select v-model="param.iterativeTag" class="m-2" :placeholder="t(`${i18nBase}.iterativeTagPlaceholder`)">
-          <el-option
-            v-for="item in iterativeTagList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </el-select>
-      </el-form-item>
-      <!-- 待定是否需要根据不同的搜索模式来进行搜索 -->
-      <el-form-item
-        :label="t(`${i18nBase}.searchPatternLabel`)"
-      >
-        <el-checkbox-group v-model="param.searchPattern">
-          <el-checkbox-button
-            v-for="item in searchPatternList"
-            :key="item"
-            :label=" t(`${i18nBase}.searchPatternList.${item}`)"
-            :value="item"
-          />
-        </el-checkbox-group>
+      <el-form-item class="items-center" :label="t('global.iteration') + '：'">
+        <div class="w-56">
+          <el-select v-model="param.iteration" :placeholder="t(`${i18nBase}.iterativeTagPlaceholder`)" clearable>
+            <template #header>
+              <div class="relative flex">
+                <el-input v-model="toAddIterationTag">
+                  <template #append>
+                    <SvgIcon class="cursor-pointer" icon-name="save" @click="handleSaveIterationTag" />
+                  </template>
+                </el-input>
+              </div>
+            </template>
+            <el-option
+              v-for="item in iterationList"
+              :key="item"
+              :label="item"
+              :value="item"
+            >
+              <template #default>
+                <div class="flex justify-between box-border items-center">
+                  {{ item }}
+                  <SvgIcon class="cursor-pointer text-gray-400 hover:text-gray-500" icon-name="trash" @click.stop="handleDeleteIterationTag(item)" />
+                </div>
+              </template>
+            </el-option>
+          </el-select>
+        </div>
       </el-form-item>
 
       <el-form-item>
@@ -39,7 +44,7 @@
       </el-form-item>
     </el-form>
 
-    <div class="pt-2">
+    <div>
       <el-button type="primary" @click="$emit('addMockItem')">{{ t(`${i18nBase}.createNewMockItem`) }}</el-button>
     </div>
   </div>
@@ -49,25 +54,36 @@ import { ref, defineModel } from 'vue';
 import { Search } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n';
 const { t }  = useI18n();
+
 const i18nBase = 'components.SearchBar'
+const iterationList = defineModel('iterationList', {type: Array, default: []});
 
-interface Props {
-  iterativeTagList?: {label: string, value: string}[],
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  iterativeTagList: () => [],
-})
+const toAddIterationTag = ref('');
 
 const param = ref({
-  searchText: '', // 查找的字符串（path、接口名、接口备注、参数字段）
-  iterativeTag: '', // 迭代版本tag，
-  searchPattern: ['path', 'apiName'], // 搜索模式（path、接口名、接口备注、参数字段），为空和全选意思等同都是全选
+  searchText: '', // 查找的字符串（path、接口名、接口备注）
+  iteration: '', // 迭代版本tag，
 });
 
-// TODO: 待定是否需要根据不同的搜索模式来进行搜索
-// Created by jzw on 2024-01-03
-const searchPatternList = [ 'path', 'apiName', 'apiRemarks', 'param' ]
+const componentEvent = defineEmits(['search', 'addMockItem', 'iterationListChange']);
+
+const handleSaveIterationTag = () => {
+  if (toAddIterationTag.value) {
+    const newIterationList = [toAddIterationTag.value, ...iterationList.value];
+    iterationList.value = newIterationList;
+    toAddIterationTag.value = '';
+    componentEvent('iterationListChange', newIterationList);
+  }
+};
+
+const handleDeleteIterationTag = (tag: any) => {
+  const newIterationList = iterationList.value.filter(item => item !== tag);
+  iterationList.value = newIterationList;
+  if(!newIterationList.includes(param.value.iteration)) {
+    param.value.iteration = '';
+  }
+  componentEvent('iterationListChange', iterationList.value);
+};
 
 </script>
 <style lang="scss">

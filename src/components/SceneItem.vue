@@ -1,16 +1,16 @@
 <template>
   <div
     :class="{
-      'scene-item group': true, 
+      'scene-item group/sceneItem': true, 
       'bg-primary-light text-white': isChecked,
       'border-solid border border-gray-500 text-gray-500': !isChecked,
     }"
   >
-    <SvgIcon class="absolute cursor-pointer hidden left-2 scale-75 group-hover:block" icon-name="edit" @click="$emit('operation', 'edit', itemData)" />
+    <SvgIcon class="absolute cursor-pointer hidden left-2 scale-75 group-hover/sceneItem:block" icon-name="edit" @click="$emit('operation', 'edit', itemData)" />
     <span class="cursor-pointer" @click="$emit('operation', 'select', itemData)">
-      {{ itemData.sceneName }}
+      {{ itemData.name }}
     </span>
-    <SvgIcon class="absolute cursor-pointer hidden right-2 scale-75 group-hover:block" icon-name="trash" @click="$emit('operation', 'delete', itemData)" />
+    <SvgIcon class="absolute cursor-pointer hidden right-2 scale-75 group-hover/sceneItem:block" icon-name="trash" @click="$emit('operation', 'delete', itemData)" />
   </div>
 </template>
 

@@ -1,3 +1,9 @@
+import { mockPatternList, requestMethodList, apiTypeList, wsMessageTypeList } from '@/utils/constants'
+
+type apiType = typeof apiTypeList[number];
+type mockPatternType = typeof mockPatternList[number];
+type requestMethodType = typeof requestMethodList[number];
+type wsMessageTypeType = typeof wsMessageTypeList[number];
 interface MenuItem {
   path: string,
   name: string,
@@ -8,10 +14,11 @@ interface MenuItem {
 interface MockItemBasicType {
   id: string;
   path?: string;
+  type:  apiType;
   name?: string;
   remarks?: string;
-  requestMethod?: string;
-  mockPattern?: string;
+  requestMethod?: requestMethodType;
+  mockPattern?: mockPatternType;
 }
 
 interface SceneItemType {
@@ -22,8 +29,17 @@ interface SceneItemType {
   param?: string;
 }
 
+interface MockItemMatchedInfoType {
+  [mockItemId: string] : {
+    sceneName: string;
+    param: string;
+  }
+}
+
 export {
   MenuItem,
   MockItemBasicType,
   SceneItemType,
+  wsMessageTypeType,
+  MockItemMatchedInfoType,
 }

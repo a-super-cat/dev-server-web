@@ -1,5 +1,29 @@
 import axios from 'axios';
+import type { wsMessageTypeType } from '@/types/common';
+// import ws from 'ws';
 import router from '../router/index';
+
+export const wsInstance = new WebSocket(`ws://localhost:3001/ws`);
+const wsCallBackMap:any = {};
+export const registerWsCallBack = (e: wsMessageTypeType, cb: (data: any) => void) => {
+  wsCallBackMap[e] = [...(wsCallBackMap[e] || []), cb];
+};
+
+export const clearEventCallBack = (e: wsMessageTypeType) => {
+  wsCallBackMap[e] = [];
+}
+
+wsInstance.onmessage = (e) => {
+  try {
+    const data = JSON.parse(e.data);
+    const { type, data: resData } = data;
+    wsCallBackMap[type]?.forEach((cb: (data: any) => void) => {
+      cb(resData);
+    });
+  } catch (err) {
+    console.log('ws received data: ', e.data);
+  }
+}
 
 const axiosInstance = axios.create({
   baseURL: `/${import.meta.env.APP_API_PREFIX}`,
@@ -50,7 +74,7 @@ axiosInstance.interceptors.response.use(config => {
 export default axiosInstance;
 
 export function defineRequest(url: string, method = 'GET', options = {}) {
-  return (data?: any) => {
+  return (data?: any):Promise<any> => {
     const tmp = method === 'GET' ? { params: data } : { data };
     return axiosInstance({
       ...options,

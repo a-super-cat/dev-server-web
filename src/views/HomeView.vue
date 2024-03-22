@@ -1,10 +1,12 @@
 <template>
-  <div class="flex w-full h-80 flex-col box-border">
+  <div class="flex w-full min-h-full pb-16 flex-col box-border relative">
 
     <div class="relative">
       <search-bar 
         @search="handleSearch"
         @addMockItem="handleAddMockItem"
+        @iteration-list-change="handleIterationListChange"
+        v-model:iterationList="iterationList"
       />
     </div>
     
@@ -13,10 +15,12 @@
         v-for="item in mockItemList"
         :key="item.basicInfo.id"
         :basic-info="item.basicInfo"
-        :scene-list="item.scenesList"
+        :scenes-list="item.scenesList"
         @save="handleSaveMockItem"
+        @delete="handleDeleteMockItem"
         @sceneOperation="handleMockItemSceneOperation"
         :selected-scene-id="mockItemAndSelectedSceneIdPair[item.basicInfo.id]"
+        :matched-info="mockItemMatchedParam[item.basicInfo.id]"
       />
     </div>
     <el-drawer 
@@ -26,14 +30,34 @@
       :close-on-click-modal="false"
     >
       <div class="h-full w-full relative flex flex-col bg-white text-gray-600 box-border px-4">
-        <div class="flex gap-4 pt-2">
-          <div class="pl-2 py-1">
-            <span>
-              {{ t('global.sceneName') }}:
-            </span>
+        <div class="flex gap-4 pt-4">
+          <div class="flex-1 flex gap-4">
+            <div class="pl-2 py-1 whitespace-nowrap">
+              <span>
+                {{ t('global.sceneName') }}:
+              </span>
+            </div>
+            <div class="flex-1">
+              <input class="border-b outline-none w-full" v-model="currentEditingSceneItem.name" />
+            </div>
           </div>
-          <div class="flex-1">
-            <input class="border-b outline-none w-full" v-model="currentEditingSceneItem.sceneName" />
+
+          <div class="flex gap-4">
+            <div class="pl-2 py-1 whitespace-nowrap">
+              <span>
+                {{ t('global.iteration') }}:
+              </span>
+            </div>
+            <div class="w-32">
+              <el-select v-model="currentEditingSceneItem.iteration">
+                <el-option 
+                  v-for="item in iterationList"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                />
+              </el-select>
+            </div>
           </div>
         </div>
         <div>
@@ -52,7 +76,7 @@
             {{ t('global.responseConfig') }}:
           </div>
           <div class="flex-1">
-            <code-editor v-model:code="currentEditingSceneItem.responseConf" @change="test" language="typescript" />
+            <code-editor v-model:code="currentEditingSceneItem.responseConf" language="typescript" />
           </div>
         </div>
 
@@ -68,84 +92,177 @@
         </div>
       </div>
     </el-drawer>
+
+    <div class="absolute bg-white box-border bottom-0 left-0 w-full h-16 flex items-center flex-row-reverse pr-9">
+      <el-pagination
+        v-model:current-page="pageInfo.current"
+        v-model:page-size="pageInfo.size"
+        :total="pageInfo.total"
+        :pager-count="5"
+        layout="prev, pager, next, sizes"
+      />
+    </div>
   </div>
 </template>
 <script setup lang="ts">
-import {ref, watch, onBeforeMount, } from 'vue'
+import {ref, onBeforeMount, watch } from 'vue'
 import { useI18n } from 'vue-i18n';
 import CodeEditor from '@/components/CodeEditor.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import MockItem from '@/components/MockItem.vue';
 import { ElMessage } from 'element-plus'
-import type { MockItemBasicType, SceneItemType } from '@/types/common';
+import type { MockItemBasicType, SceneItemType, MockItemMatchedInfoType } from '@/types/common';
 import {v4 as uuid} from 'uuid';
 import cloneDeep from 'lodash/cloneDeep';
 import JSON5 from 'json5';
-import { 
-  saveSceneItem,
+import { registerWsCallBack, clearEventCallBack } from '@/utils/request'
+import {
+  search,
   saveMockItem,
-  getMockList,
+  deleteMockItem,
+  getSceneItemResponseConf,
+  saveSceneItem,
+  deleteSceneItem,
+  selectSceneItem,
+  getIterationList,
+  saveIterationList,
 } from '@/api/system';
+
 const { t }  = useI18n();
 
 const i18nBase = 'page.HomeView';
 const editorActions = ['save', 'saveAndClose', 'close'];
+// 当前正在编辑的mockItem
+const currentEditingMockItemBaseInfo = ref<MockItemBasicType>({} as MockItemBasicType);
 // 当前正在编辑的场景
 const currentEditingSceneItem = ref<SceneItemType>({} as SceneItemType);
 // 是否显示代码编辑器
 const isShowCodeEditor = ref(false);
 // mockItem列表
 const mockItemList = ref<{basicInfo: MockItemBasicType, scenesList: SceneItemType[]}[]>([] as any);
-
 // 每个mockItem被选中的场景id
 const mockItemAndSelectedSceneIdPair = ref<{[key: string]: string}>({});
-mockItemAndSelectedSceneIdPair.value = {
-  mockItemId1: 'scene1',
-  mockItemId2: 'xxx',
+// 迭代期
+const iterationList = ref<string[]>([]);
+// 搜索参数
+const searchParam = ref({} as any);
+// 分页信息
+const pageInfo = ref({current: 1, size: 10, total: 0} as any);
+// 被匹配到的mockItem的参数信息
+const mockItemMatchedParam = ref({} as MockItemMatchedInfoType);
+
+const handleSearch = (param: any) => {
+  searchParam.value = param;
+  pageInfo.value = { ...pageInfo.value, current: 1 };
 };
 
-mockItemList.value = [];
+// 保存迭代期列表
+const handleIterationListChange = async (list: string[]) => {
+  const res = await saveIterationList(list);
+  if (res.code !== 200) {
+    ElMessage.error('迭代保存失败');
+  }
+};
 
-const handleMockItemSceneOperation = (operation: string, mockItemBasicInfo: any, sceneItem: any) => {
+// 获取迭代期列表
+const handleGetIterationList = async () => {
+  const res = await getIterationList();
+  if (res.code === 200) {
+    iterationList.value = res.data;
+  } else {
+    ElMessage.error('获取迭代列表失败');
+  }
+};
+
+// 场景变化后的处理
+const handleAfterChangeMockItemScene = (mockItemId: string, newSceneList: SceneItemType[]) => {
+  const mockItem = mockItemList.value.find(item => item.basicInfo.id === mockItemId);
+  if (mockItem) {
+    mockItem.scenesList = newSceneList;
+  }
+}
+
+// 处理mockItem场景操作
+const handleMockItemSceneOperation = async (operation: string, mockItemBasicInfo: any, sceneItem: any) => {
+  currentEditingMockItemBaseInfo.value = mockItemBasicInfo;
+  console.log('operation', operation, mockItemBasicInfo, sceneItem);
   switch (operation) {
     case 'add':
       currentEditingSceneItem.value = {
         id: uuid(),
-        name: '',
-        param: '',
-        responseConf: '',
+        name: '场景名',
+        iteration: iterationList.value[0] ?? '',
+        param: '{\r\n  \r\n}',
+        responseConf: 'export default (param: {name: string, age: number}) => {\r\n  \r\n}',
       };
       isShowCodeEditor.value = true;
-      console.log('add', mockItemBasicInfo);
       break;
     case 'select':
-      mockItemAndSelectedSceneIdPair.value[mockItemBasicInfo.id] = sceneItem.id;
+      {
+        const currentMockItemSelectedSceneId = mockItemAndSelectedSceneIdPair.value[mockItemBasicInfo.id];
+        const nextMockItemSelectedSceneId = currentMockItemSelectedSceneId === sceneItem.id ? '' : sceneItem.id;
+        await selectSceneItem({ mockItemId: mockItemBasicInfo.id, sceneId: nextMockItemSelectedSceneId });
+        mockItemAndSelectedSceneIdPair.value[mockItemBasicInfo.id] = nextMockItemSelectedSceneId;
+      }
       break;
     case 'edit':
       {
-        console.log('edit', sceneItem);
-        currentEditingSceneItem.value = cloneDeep(sceneItem);
+        const sceneItemResponseConf = await getSceneItemResponseConf({mockItemId: mockItemBasicInfo.id, sceneId: sceneItem.id});
+        if (!sceneItemResponseConf.data) {
+          ElMessage.error('获取场景配置失败');
+          return;
+        }
+        currentEditingSceneItem.value = {
+          ...cloneDeep(sceneItem),
+          responseConf: sceneItemResponseConf.data,
+        };
         isShowCodeEditor.value = true;
       }
       break;
     case 'delete':
-      // handleMockItemSceneSelectedDelete(mockItemBasicInfo, sceneItem);
+      {
+        const res = await deleteSceneItem({mockItemId: mockItemBasicInfo.id, sceneId: sceneItem.id});
+        if (res.code === 200) {
+          ElMessage.success('删除成功');
+          handleAfterChangeMockItemScene(mockItemBasicInfo.id, res.data);
+        } else {
+          ElMessage.error(`删除失败 ${res.msg}`);
+        }
+      }
       break;
     default:
       break;
   }
 };
 
-const handleEditoActions = (action: string) => {
+// 保存场景
+const handleSaveSceneItem = async (isCloseCodeEditor = false) => {
+  const res = await saveSceneItem({
+    ...currentEditingSceneItem.value,
+    mockItemId: currentEditingMockItemBaseInfo.value.id,
+  });
+  if (res.code === 200) {
+    ElMessage.success('保存成功');
+    const item = res.data.find((item: any) => item.id === currentEditingSceneItem.value.id);
+    if (item) {
+      currentEditingSceneItem.value = item;
+    }
+    if (isCloseCodeEditor) {
+      isShowCodeEditor.value = false;
+    }
+    handleAfterChangeMockItemScene(currentEditingMockItemBaseInfo.value.id, res.data);
+  } else {
+    ElMessage.error(`保存失败 ${res.msg}`);
+  }
+};
+
+const handleEditoActions = async (action: string) => {
   switch (action) {
     case 'save':
-      saveSceneItem(currentEditingSceneItem.value);
-      console.log('save', JSON5.parse(currentEditingSceneItem.value.param || '') );
+      await handleSaveSceneItem();
       break;
     case 'saveAndClose':
-      // testApi({name: '123'})
-      console.log('saveAndClose', currentEditingSceneItem.value);
-      // isShowCodeEditor.value = false;
+      await handleSaveSceneItem(true);
       break;
     case 'close':
       isShowCodeEditor.value = false;
@@ -153,14 +270,8 @@ const handleEditoActions = (action: string) => {
     default:
       break;
   }
-};
-
-const test = (code: string) => {
-  console.log('code change', code);
-};
-
-const handleSearch = (param: any) => {
-  console.log('search', param);
+  if(action !== 'save')
+   currentEditingMockItemBaseInfo.value = {} as MockItemBasicType;
 };
 
 const handleAddMockItem = () => {
@@ -169,6 +280,7 @@ const handleAddMockItem = () => {
       id: uuid(),
       path: '',
       name: '接口名',
+      type: 'HTTP',
       remarks: '接口备注',
       requestMethod: 'GET',
       mockPattern: 'mock',
@@ -178,14 +290,63 @@ const handleAddMockItem = () => {
   console.log('addMockItem');
 };
 
-const handleSaveMockItem = async (mockItemBase: MockItemBasicType) => {
-  const res = saveMockItem(mockItemBase);
-  console.log('saveMockItem', res);
+// 获取mockItem列表
+const handleGetMockList = async () => {
+  const res = await search({
+    ...pageInfo.value,
+    ...searchParam.value,
+  });
+  if (res.code === 200) {
+    const { list = [], pageInfo } = res.data;
+    list.forEach((item: any) => {
+      mockItemAndSelectedSceneIdPair.value[item.basicInfo.id] = item.basicInfo.selectedSceneId;
+    });
+    mockItemList.value = list;
+    pageInfo.value = { ...pageInfo.value, ...pageInfo };
+  } else {
+    ElMessage.error('获取mock列表失败');
+  }
 };
 
-onBeforeMount( async () => {
-  const res = await getMockList();
-  mockItemList.value = res.data;
+// 保存mockItem
+const handleSaveMockItem = async (mockItemBase: MockItemBasicType) => {
+  const res = await saveMockItem(mockItemBase);
+  if (res.data) {
+    ElMessage.success('保存成功');
+    handleGetMockList();
+  } else {
+    ElMessage.error('保存失败');
+  }
+};
+
+// 删除mockItem
+const handleDeleteMockItem = async (mockItemId: string) => {
+  const res = await deleteMockItem({id: mockItemId});
+  if (res.code === 200) {
+    ElMessage.success('删除成功');
+    handleGetMockList();
+  } else {
+    ElMessage.error('删除失败');
+  }
+};
+
+// 处理mockItem被匹配到时的实际请求参数及匹配到的场景
+const handleMockItemMatched = (arg: any) => {
+  const { matchedScene, mockItemId, param } = arg;
+  mockItemMatchedParam.value[mockItemId] = {
+    sceneName: matchedScene,
+    param: JSON5.stringify(param, null, 2),
+  };
+};
+
+
+watch(() => pageInfo.value, handleGetMockList, { immediate: true, deep: true });
+
+onBeforeMount(() => {
+  clearEventCallBack('param');
+  registerWsCallBack('param', handleMockItemMatched);
+  handleGetIterationList();
+
 });
 </script>
 <style lang="scss">

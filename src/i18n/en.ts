@@ -1,7 +1,7 @@
 export default {
   components: {
     SearchBar: {
-      searchInputPlaceholder: 'please input text for search (eg: apiPath、comment、param)',
+      searchInputPlaceholder: 'please input text for search (apiPath、remarks)',
       iterativeTagPlaceholder: 'select iterative tag',
       searchPatternLabel: 'searchPattern',
       searchPatternList: {
@@ -20,12 +20,14 @@ export default {
         apiRemarksLabel: 'Api Remarks',
         requestMethodLabel: 'Request Method',
         mockPatternLabel: 'Mock Pattern',
+        apiTypeLabel: 'Api Type',
         mockPatternList: {
           mock: 'Mock',
           request: 'realRequest',
           mockJs: 'MockJs',
         },
       },
+      matchedSceneLabel: 'Matched Scene',
       scene: 'scene',
       currentMockPatternLabel: 'pattern',
       param: 'param',
@@ -48,5 +50,6 @@ export default {
     param: 'param',
     responseConfig: 'responseConfig',
     sceneName: 'scene name',
+    iteration: 'Iteration',
   },
 }
