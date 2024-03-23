@@ -21,9 +21,11 @@ jobs:
 
       - name: Build
         run: npm run build
-
-      - name: Publish package
+      - name: Authenticate with npm
+        run: npm login --registry=https://registry.npmjs.org/ --scope=public --auth-type=token
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish package
         run: npm publish --access public
         
