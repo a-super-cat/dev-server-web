@@ -1,4 +1,4 @@
-name: Publish NPM Package
+name: Publish to npm
 
 on:
   push:
@@ -6,26 +6,27 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-publish:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          node-version: '18.x'
-          registry-url: 'https://registry.npmjs.org'
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Install dependencies
-        run: npm install
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 18
+        registry-url: https://registry.npmjs.org/
 
-      - name: Build
-        run: npm run build
-      - name: Authenticate with npm
-        run: npm login --registry=https://registry.npmjs.org/ --scope=public --auth-type=token
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    - name: Install dependencies
+      run: npm i
 
-      - name: Publish package
-        run: npm publish --access public
-        
+    - name: Build
+      run: npm run build
+
+    - name: Publish to npm
+      uses: JS-DevTools/npm-publish@v3.1.0
+      with:
+        token: ${{ secrets.NPM_TOKEN }}
+        access: public
