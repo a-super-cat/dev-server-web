@@ -2,7 +2,8 @@
   "name": "@jiazhiwei/dev-server-web",
   "version": "0.1.4",
   "files": [
-    "dist"
+    "dist",
+    "copyFileToParentProject.js"
   ],
   "scripts": {
     "dev": "vite --mode dev",
