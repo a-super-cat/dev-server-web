@@ -275,7 +275,7 @@ const handleEditoActions = async (action: string) => {
 };
 
 const handleAddMockItem = () => {
-  mockItemList.value.push({
+  mockItemList.value.unshift({
     basicInfo: {
       id: uuid(),
       path: '',
@@ -333,6 +333,7 @@ const handleDeleteMockItem = async (mockItemId: string) => {
 // 处理mockItem被匹配到时的实际请求参数及匹配到的场景
 const handleMockItemMatched = (arg: any) => {
   const { matchedScene, mockItemId, param } = arg;
+  console.log('matchedInfo', arg);
   mockItemMatchedParam.value[mockItemId] = {
     sceneName: matchedScene,
     param: JSON5.stringify(param, null, 2),
