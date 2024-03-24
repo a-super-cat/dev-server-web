@@ -9,6 +9,7 @@ import {svgSpritemap} from 'vite-plugin-svg-spritemap';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/mock-web/',
   envDir: './env',
   envPrefix: 'APP_',
   server: {
