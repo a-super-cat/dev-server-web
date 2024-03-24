@@ -28,7 +28,8 @@ const locale = lang.toLocaleLowerCase().includes('zh') ? zhCn : en
             :key="item.name"
             @click="handleMenuItemClick(item)"
           >
-            <span :class="`iconfont text-4xl ${item.icon}`" />
+          <SvgIcon class="text-gray-200" :icon-name="item.icon" />
+            <!-- <span :class="`iconfont text-4xl ${item.icon}`" /> -->
             {{ item.name }}
           </div>
         </div>

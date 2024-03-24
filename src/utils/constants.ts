@@ -5,21 +5,15 @@ export const menuItems: MenuItem[] = [
   {
     path: '/',
     name: '数据模拟',
-    icon: 'icon-wangyuanjing',
+    icon: 'mock',
     component: () => import('@/views/HomeView.vue'),
   },
   {
     path: '/request',
     name: '接口请求',
-    icon: 'icon-huiduceshi',
+    icon: 'requestApi',
     component: () => import('@/views/ApiRequest.vue'),
   },
-  {
-    path: '/apiTest',
-    name: '接口测试',
-    icon: 'icon-a-5',
-    component: () => import('@/views/ApiTest.vue'),
-  }
 ];
 
 // 处理请求的方式
