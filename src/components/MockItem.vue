@@ -100,7 +100,7 @@
           </div>
 
           <div class="param-text-bg">
-            <textarea :rows="8" class="w-full h-full outline-none border" :value="matchedInfo.param"></textarea>
+            <el-input type="textarea" :rows="8" :value="matchedInfo.param"></el-input>
           </div>
         </div>
         <div v-else class="flex flex-col h-full gap-4">
@@ -186,7 +186,7 @@ watch(() => props.basicInfo, () => {
 
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .param-text-bg {
   position: relative;
   background-color: #fff;
@@ -194,6 +194,12 @@ watch(() => props.basicInfo, () => {
     position: relative;
     background-color: transparent;
     z-index: 9;
+    box-shadow: 0 0 0 1px #409eff;
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
   }
   &::before {
     content: 'Param';
