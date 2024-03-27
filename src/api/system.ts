@@ -5,6 +5,8 @@ export const login = defineRequest(`${systemApiPrefix}/login`, 'POST');
 
 // 是否从请求中创建mockItem
 export const isCreateMockItemFromRequest = defineRequest(`${systemApiPrefix}/isCreateMockItemFromRequest`, 'GET');
+// 获取是否从请求中创建mockItem的布尔值
+export const getIsCreateMockItemFromRequest = defineRequest(`${systemApiPrefix}/flagForIsCreateMockItemFromRequest`, 'GET');
 
 // 搜索 & 获取mockItem列表
 export const search = defineRequest(`${systemApiPrefix}/search`, 'POST');

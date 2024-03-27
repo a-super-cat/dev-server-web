@@ -129,6 +129,7 @@ import {
   getIterationList,
   saveIterationList,
   isCreateMockItemFromRequest,
+  getIsCreateMockItemFromRequest,
 } from '@/api/system';
 
 const { t }  = useI18n();
@@ -355,6 +356,14 @@ const handleMockFromRequestChange = async () => {
   }
 };
 
+// 获取是否从请求中创建mockItem
+const flagForIsCreateMockItemFromRequest = async () => {
+  const res = await getIsCreateMockItemFromRequest();
+  if (res.code === 200) {
+    isMockItemFromRequest.value = res.data;
+  }
+};
+
 watch(() => pageInfo.value, handleGetMockList, { immediate: true, deep: true });
 
 onBeforeMount(() => {
@@ -365,7 +374,7 @@ onBeforeMount(() => {
     handleGetMockList();
   });
   handleGetIterationList();
-
+  flagForIsCreateMockItemFromRequest();
 });
 </script>
 <style lang="scss">
