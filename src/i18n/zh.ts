@@ -4,6 +4,7 @@ export default {
       searchInputPlaceholder: '请输入查询（请求路径、备注）',
       iterativeTagPlaceholder: '迭代期标签',
       searchPatternLabel: '搜索模式',
+      mockFromRequestLabel: "是否从请求生成Mock项",
       searchPatternList: {
         path: '路径',
         apiName: '接口名',
@@ -25,6 +26,7 @@ export default {
           mock: 'Mock',
           request: '真实请求',
           mockJs: 'MockJs',
+          'request&create': '请求&创建场景',
         },
       },
       matchedSceneLabel: '匹配到的场景',

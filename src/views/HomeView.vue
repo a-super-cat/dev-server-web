@@ -1,17 +1,19 @@
 <template>
-  <div class="flex w-full min-h-full pb-16 flex-col box-border relative">
+  <div class="flex w-full min-h-full gap-4 flex-col box-border relative bg-gray-50">
 
     <div class="relative">
       <search-bar 
         @search="handleSearch"
         @addMockItem="handleAddMockItem"
         @iteration-list-change="handleIterationListChange"
+        @mock-from-request-change="handleMockFromRequestChange"
+        :mockFromRequest="isMockItemFromRequest"
         v-model:iterationList="iterationList"
       />
     </div>
     
-    <div class="flex-1 gap-4 flex flex-col">
-      <mock-item 
+    <div class="flex-1 grid grid-cols-1 gap-4">
+      <mock-item
         v-for="item in mockItemList"
         :key="item.basicInfo.id"
         :basic-info="item.basicInfo"
@@ -93,7 +95,7 @@
       </div>
     </el-drawer>
 
-    <div class="absolute bg-white box-border bottom-0 left-0 w-full h-16 flex items-center flex-row-reverse pr-9">
+    <div class="w-full h-16 flex items-center flex-row-reverse pr-9">
       <el-pagination
         v-model:current-page="pageInfo.current"
         v-model:page-size="pageInfo.size"
@@ -126,6 +128,7 @@ import {
   selectSceneItem,
   getIterationList,
   saveIterationList,
+  isCreateMockItemFromRequest,
 } from '@/api/system';
 
 const { t }  = useI18n();
@@ -146,8 +149,10 @@ const mockItemAndSelectedSceneIdPair = ref<{[key: string]: string}>({});
 const iterationList = ref<string[]>([]);
 // 搜索参数
 const searchParam = ref({} as any);
+// 是否从请求中创建mockItem
+const isMockItemFromRequest = ref(false);
 // 分页信息
-const pageInfo = ref({current: 1, size: 10, total: 0} as any);
+const pageInfo = ref({current: 1, size: 10, total: 0} as {current: number, size: number, total: number});
 // 被匹配到的mockItem的参数信息
 const mockItemMatchedParam = ref({} as MockItemMatchedInfoType);
 
@@ -340,12 +345,25 @@ const handleMockItemMatched = (arg: any) => {
   };
 };
 
+// 处理是否从请求中创建mockItem
+const handleMockFromRequestChange = async () => {
+  const res = await isCreateMockItemFromRequest();
+  if (res.code === 200) {
+    isMockItemFromRequest.value = res.data;
+  } else {
+    ElMessage.error('操作失败');
+  }
+};
 
 watch(() => pageInfo.value, handleGetMockList, { immediate: true, deep: true });
 
 onBeforeMount(() => {
   clearEventCallBack('param');
   registerWsCallBack('param', handleMockItemMatched);
+  registerWsCallBack('refresh:mockList', () => {
+    pageInfo.value.current = 1;
+    handleGetMockList();
+  });
   handleGetIterationList();
 
 });

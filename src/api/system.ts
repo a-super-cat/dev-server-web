@@ -3,6 +3,9 @@ const systemApiPrefix = '/mock-system';
 
 export const login = defineRequest(`${systemApiPrefix}/login`, 'POST');
 
+// 是否从请求中创建mockItem
+export const isCreateMockItemFromRequest = defineRequest(`${systemApiPrefix}/isCreateMockItemFromRequest`, 'GET');
+
 // 搜索 & 获取mockItem列表
 export const search = defineRequest(`${systemApiPrefix}/search`, 'POST');
 // 获取迭代期列表

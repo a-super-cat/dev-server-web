@@ -17,7 +17,7 @@ export const menuItems: MenuItem[] = [
 ];
 
 // 处理请求的方式
-export const mockPatternList = ['mock', 'request', 'mockJs'] as const;
+export const mockPatternList = ['mock', 'request', 'request&create', 'mockJs'] as const;
 
 // 接口请求方式
 export const requestMethodList = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] as const;
@@ -25,4 +25,4 @@ export const requestMethodList = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] as co
 // 接口类型
 export const apiTypeList = ['HTTP', 'JSON-RPC'] as const;
 
-export const wsMessageTypeList = ['param'] as const;
+export const wsMessageTypeList = ['param', 'refresh:mockList'] as const;

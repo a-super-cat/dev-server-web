@@ -4,6 +4,7 @@ export default {
       searchInputPlaceholder: 'please input text for search (apiPath、remarks)',
       iterativeTagPlaceholder: 'select iterative tag',
       searchPatternLabel: 'searchPattern',
+      mockFromRequestLabel: "generate mock item from request?",
       searchPatternList: {
         path: 'path',
         apiName: 'apiName',
@@ -25,6 +26,7 @@ export default {
           mock: 'Mock',
           request: 'realRequest',
           mockJs: 'MockJs',
+          'request&create': 'Request&CreateScene',
         },
       },
       matchedSceneLabel: 'Matched Scene',

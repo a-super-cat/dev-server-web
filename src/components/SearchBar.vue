@@ -1,5 +1,5 @@
 <template>
-  <div class="search-bar-component flex justify-between px-4 py-2">
+  <div class="search-bar-component flex justify-between px-4 py-2 bg-white">
     <el-form :inline="true">
       <el-form-item>
         <div class="w-96">
@@ -39,6 +39,14 @@
         </div>
       </el-form-item>
 
+      <el-form-item :label="t(`${i18nBase}.mockFromRequestLabel`)" class="items-center">
+        <el-switch
+          v-model="innerMockFromRequest"
+          size="large"
+          @change="$emit('mockFromRequestChange', $event)"
+        />
+      </el-form-item>
+
       <el-form-item>
         <el-button @click="$emit('search', param)" type="primary">{{ t(`${i18nBase}.searchBtn`) }}</el-button>
       </el-form-item>
@@ -50,22 +58,31 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, defineModel } from 'vue';
+import { ref, defineModel, watch } from 'vue';
 import { Search } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n';
 const { t }  = useI18n();
 
 const i18nBase = 'components.SearchBar'
+
+interface Props {
+  mockFromRequest: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  mockFromRequest: false,
+});
 const iterationList = defineModel('iterationList', {type: Array, default: []});
+const componentEvent = defineEmits(['search', 'addMockItem', 'iterationListChange', 'mockFromRequestChange']);
 
 const toAddIterationTag = ref('');
+const innerMockFromRequest = ref(props.mockFromRequest);
 
 const param = ref({
   searchText: '', // 查找的字符串（path、接口名、接口备注）
   iteration: '', // 迭代版本tag，
 });
 
-const componentEvent = defineEmits(['search', 'addMockItem', 'iterationListChange']);
 
 const handleSaveIterationTag = () => {
   if (toAddIterationTag.value) {
@@ -84,6 +101,10 @@ const handleDeleteIterationTag = (tag: any) => {
   }
   componentEvent('iterationListChange', iterationList.value);
 };
+
+watch(() => props.mockFromRequest, (value) => {
+  innerMockFromRequest.value = value;
+});
 
 </script>
 <style lang="scss">
