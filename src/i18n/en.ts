@@ -11,6 +11,10 @@ export default {
         apiRemarks: 'apiRemarks',
         param: 'param'
       },
+      formOfDisplay: {
+        brief: 'brief',
+        normal: 'normal',
+      },
       searchBtn: 'search',
       createNewMockItem: 'Create New MockItem',
     },
@@ -29,6 +33,7 @@ export default {
           'request&create': 'Request&CreateScene',
         },
       },
+
       matchedSceneLabel: 'Matched Scene',
       scene: 'scene',
       currentMockPatternLabel: 'pattern',

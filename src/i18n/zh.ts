@@ -11,6 +11,10 @@ export default {
         apiRemarks: '接口备注',
         param: '参数'
       },
+      formOfDisplay: {
+        brief: '精简',
+        normal: '标准',
+      },
       searchBtn: '查询',
       createNewMockItem: '新建Mock项',
     },

@@ -9,6 +9,7 @@
         @mock-from-request-change="handleMockFromRequestChange"
         :mockFromRequest="isMockItemFromRequest"
         v-model:iterationList="iterationList"
+        v-model:is-brief-mode="isBriefMode"
       />
     </div>
     
@@ -18,6 +19,7 @@
         :key="item.basicInfo.id"
         :basic-info="item.basicInfo"
         :scenes-list="item.scenesList"
+        :is-brief-mode="isBriefMode"
         @save="handleSaveMockItem"
         @delete="handleDeleteMockItem"
         @sceneOperation="handleMockItemSceneOperation"
@@ -95,7 +97,7 @@
       </div>
     </el-drawer>
 
-    <div class="w-full h-16 flex items-center flex-row-reverse pr-9">
+    <div class="w-full h-16 flex items-center flex-row-reverse bg-white pr-9">
       <el-pagination
         v-model:current-page="pageInfo.current"
         v-model:page-size="pageInfo.size"
@@ -136,6 +138,14 @@ const { t }  = useI18n();
 
 const i18nBase = 'page.HomeView';
 const editorActions = ['save', 'saveAndClose', 'close'];
+// 迭代期
+const iterationList = ref<string[]>([]);
+// 搜索参数
+const searchParam = ref({} as any);
+// 是否从请求中创建mockItem
+const isMockItemFromRequest = ref(false);
+// 是否简洁模式
+const isBriefMode = ref(false);
 // 当前正在编辑的mockItem
 const currentEditingMockItemBaseInfo = ref<MockItemBasicType>({} as MockItemBasicType);
 // 当前正在编辑的场景
@@ -146,12 +156,6 @@ const isShowCodeEditor = ref(false);
 const mockItemList = ref<{basicInfo: MockItemBasicType, scenesList: SceneItemType[]}[]>([] as any);
 // 每个mockItem被选中的场景id
 const mockItemAndSelectedSceneIdPair = ref<{[key: string]: string}>({});
-// 迭代期
-const iterationList = ref<string[]>([]);
-// 搜索参数
-const searchParam = ref({} as any);
-// 是否从请求中创建mockItem
-const isMockItemFromRequest = ref(false);
 // 分页信息
 const pageInfo = ref({current: 1, size: 10, total: 0} as {current: number, size: number, total: number});
 // 被匹配到的mockItem的参数信息
@@ -307,7 +311,22 @@ const handleGetMockList = async () => {
     list.forEach((item: any) => {
       mockItemAndSelectedSceneIdPair.value[item.basicInfo.id] = item.basicInfo.selectedSceneId;
     });
-    mockItemList.value = list;
+    if (list?.length) {
+      mockItemList.value = list;
+    } else {
+      mockItemList.value = [{
+        basicInfo: {
+          id: uuid(),
+          path: '',
+          name: '接口名',
+          type: 'HTTP',
+          remarks: '接口备注',
+          requestMethod: 'GET',
+          mockPattern: 'mock',
+        },
+        scenesList: [],
+      }];
+    }
     pageInfo.value = { ...pageInfo.value, ...pageInfo };
   } else {
     ElMessage.error('获取mock列表失败');

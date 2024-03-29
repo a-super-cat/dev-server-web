@@ -50,6 +50,16 @@
       <el-form-item>
         <el-button @click="$emit('search', param)" type="primary">{{ t(`${i18nBase}.searchBtn`) }}</el-button>
       </el-form-item>
+
+      <el-switch
+        v-model="isBriefMode"
+        size="large"
+        class="ml-2"
+        inline-prompt
+        style="--el-switch-on-color: #409eff; --el-switch-off-color: #409eff"
+        :active-text="t(`${i18nBase}.formOfDisplay.brief`)"
+        :inactive-text="t(`${i18nBase}.formOfDisplay.normal`)"
+      />
     </el-form>
 
     <div>
@@ -73,6 +83,8 @@ const props = withDefaults(defineProps<Props>(), {
   mockFromRequest: false,
 });
 const iterationList = defineModel('iterationList', {type: Array, default: []});
+const isBriefMode = defineModel('isBriefMode', {type: Boolean, default: false});
+
 const componentEvent = defineEmits(['search', 'addMockItem', 'iterationListChange', 'mockFromRequestChange']);
 
 const toAddIterationTag = ref('');
