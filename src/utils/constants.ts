@@ -8,12 +8,12 @@ export const menuItems: MenuItem[] = [
     icon: 'mock',
     component: () => import('@/views/HomeView.vue'),
   },
-  // {
-  //   path: '/assetsManage',
-  //   name: '接口请求',
-  //   icon: 'requestApi',
-  //   component: () => import('@/views/AssetsManage.vue'),
-  // },
+  {
+    path: '/assetsManage',
+    name: '静态资源',
+    icon: 'assetsManagement',
+    component: () => import('@/views/AssetsManage.vue'),
+  },
 ];
 
 // 处理请求的方式

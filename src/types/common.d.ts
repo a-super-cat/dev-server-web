@@ -36,10 +36,19 @@ interface MockItemMatchedInfoType {
   }
 }
 
+interface AssetsItemType {
+  name: string, 
+  url: string, 
+  extension: string, 
+  isFavorited?: boolean, 
+  fileSet?: string[],
+}
+
 export {
   MenuItem,
   MockItemBasicType,
   SceneItemType,
   wsMessageTypeType,
   MockItemMatchedInfoType,
+  AssetsItemType,
 }

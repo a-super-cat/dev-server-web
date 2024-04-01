@@ -39,6 +39,17 @@ export default {
       param: '参数',
       addScene: '添加场景',
     },
+
+    SettingConf: {
+      title: '设置',
+      apiList: {
+        upload: '上传接口',
+        list: '列表接口',
+        delete: '删除接口',
+        update: '更新接口',
+      },
+      apiConfig: '接口配置',
+    }
   },
   page: {
     HomeView: {
@@ -47,7 +58,25 @@ export default {
         saveAndClose: '保存并关闭',
         close: '关闭',
       }
-    }
+    },
+    AssetsManagement: {
+      uploadNotice: '拖拽文件到此处，或点击上传',
+      panelTitle: {
+        default: '资源',
+        favorite: '收藏夹',
+      },
+      addPanelModal: {
+        title: '添加面板',
+        panelNamePlaceholder: '请输入面板名',
+        confirm: '确认',
+        cancel: '取消',
+        inputErrorMessage: '请输入面板名',
+      },
+      addToSet: '添加到集合',
+      selectPanelTable: {
+        panelLabel: '集合名',
+      }
+    },
   },
   global: {
     confirm: '确认',

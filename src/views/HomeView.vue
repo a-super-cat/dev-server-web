@@ -13,7 +13,7 @@
       />
     </div>
     
-    <div class="flex-1 grid grid-cols-1 gap-4">
+    <div class="flex-1 flex flex-col gap-4">
       <mock-item
         v-for="item in mockItemList"
         :key="item.basicInfo.id"
@@ -71,7 +71,7 @@
             </span>
           </div>
           <div class="h-52">
-          <code-editor v-model:code="currentEditingSceneItem.param" language="json" />
+          <code-editor v-model="currentEditingSceneItem.param" language="json" />
           </div>
         </div>
         
@@ -80,7 +80,7 @@
             {{ t('global.responseConfig') }}:
           </div>
           <div class="flex-1">
-            <code-editor v-model:code="currentEditingSceneItem.responseConf" language="typescript" />
+            <code-editor v-model="currentEditingSceneItem.responseConf" language="typescript" />
           </div>
         </div>
 

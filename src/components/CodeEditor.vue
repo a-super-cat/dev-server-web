@@ -24,10 +24,7 @@ const props = withDefaults(defineProps<CodeEditorProps>(), {
   theme: 'vs-dark',
   language: 'json',
 });
-const code = defineModel('code', {
-  type: String,
-  default: ''
-});
+const code = defineModel<string>({ default: ''});
 // 组件事件
 const componentEvent = defineEmits<{
   change: [code: string], // 代码内容

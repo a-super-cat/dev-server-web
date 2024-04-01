@@ -40,6 +40,16 @@ export default {
       param: 'param',
       addScene: 'Add Scene',
     },
+    SettingConf: {
+      title: 'Setting',
+      apiList: {
+        upload: 'Upload Api',
+        list: 'List Api',
+        delete: 'Delete Api',
+        update: 'Update Api',
+      },
+      apiConfig: 'Api Config',
+    }
   },
   page: {
     HomeView: {
@@ -48,7 +58,25 @@ export default {
         saveAndClose: 'Save & Close',
         close: 'Close',
       }
-    }
+    },
+    AssetsManagement: {
+      uploadNotice: 'Drop files here or click to upload',
+      panelTitle: {
+        default: 'Assets',
+        favorite: 'Favorite',
+      },
+      addPanelModal: {
+        title: 'Add Panel',
+        panelNamePlaceholder: 'Please input panel name',
+        confirm: 'Confirm',
+        cancel: 'Cancel',
+        inputErrorMessage: 'Please input panel name',
+      },
+      addToSet: 'Add to Set',
+      selectPanelTable: {
+        panelLabel: 'Set Name',
+      }
+    },
   },
   global: {
     confirm: 'Confirm',

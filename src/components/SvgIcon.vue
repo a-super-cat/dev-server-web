@@ -1,6 +1,6 @@
 <template>
-  <div :class="$attrs.class">
-    <svg aria-hidden="true" :class="`svg-icon ${''}`" :style="{width, height}">
+  <div>
+    <svg aria-hidden="true" :class="`svg-icon`" :style="{width, height}">
       <use :xlink:href="`/mock-web/svgIcons.svg#${iconName}`" :fill="color" />
     </svg>
   </div>

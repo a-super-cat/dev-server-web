@@ -1,7 +1,7 @@
 <template>
   <div
     :class="{
-      'scene-item group/sceneItem': true, 
+      'scene-item group/sceneItem relative': true, 
       'bg-primary-light text-white': isChecked,
       'border-solid border border-gray-500 text-gray-500': !isChecked,
     }"
