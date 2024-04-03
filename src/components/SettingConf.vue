@@ -1,19 +1,38 @@
 <template >
   <div>
       <el-form label-width="72px" class="pt-6 px-4">
+        <el-form-item >
+          <div class="flex flex-row-reverse w-full gap-4">
+            <el-button :disabled="!!confData.token" type="primary" @click="$emit('login', confData)">登录</el-button>
+            <el-button type="primary" @click="$emit('save', confData)">保存</el-button>
+          </div>
+        </el-form-item>
         <div class="grid grid-cols-2">
           <el-form-item label="用户名">
             <el-input v-model="confData.username" />
           </el-form-item>
 
           <el-form-item label="密码">
-            <el-input v-model="confData.password" />
+            <el-input v-model="confData.password">
+              <template #append>
+                <div class="flex gap-6">
+                  <el-select
+                    v-model="confData.passwordEncryptType"
+                    placeholder="EncryptType"
+                    style="width: 96px;"
+                  >
+                    <el-option v-for="item in passwordEncryptTypeList" :key="item.value" :label="item.label" :value="item.value" />
+                  </el-select>
+                  <input class="block bg-transparent text-center outline-none" v-model="confData.salt" placeholder="salt" style="width: 96px;" />
+                </div>
+              </template>
+            </el-input>
           </el-form-item>
 
           <div class="col-span-2">
             <el-form-item label="登录地址">
               <div class="flex w-full">
-                <el-input class="flex-1" v-model="confData.loginPath">
+                <el-input class="flex-1" v-model="confData.apiPath">
                   <template #append>
                     <div class="flex items-center relative gap-10 w-60">
                       <el-select
@@ -55,11 +74,6 @@
             <el-input class="flex-1" type="textarea" v-model="confData.token" />
           </div>
         </el-form-item>
-        <el-form-item >
-          <div class="flex flex-row-reverse w-full">
-            <el-button type="primary" @click="$emit('login', confData)">保存并登录</el-button>
-          </div>
-        </el-form-item>
 
         <div class="grid grid-cols-2 box-border gap-4" v-if="settingFor === 'assets'">
           
@@ -97,10 +111,16 @@
 import { defineModel } from 'vue';
 import { requestMethodList } from '@/utils/constants';
 import RequestResponseConf from './RequestResponseConf.vue';
+import crypto from 'crypto-js';
 import { useI18n } from 'vue-i18n';
 const { t }  = useI18n();
 const i18nBase = 'components.SettingConf';
 const apiList = ['list', 'upload', 'delete', 'update'];
+
+const passwordEncryptTypeList = [
+  {label: 'none', value: ''},
+  ...Object.keys(crypto).filter(item => item.charAt(0) < 'Z').map(item => ({label: item, value: item})),
+];
 
 defineProps(['settingFor'])
 

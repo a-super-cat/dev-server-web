@@ -3,7 +3,10 @@
     <div>
       <el-upload
         drag
-        action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
+        :action="`/api/${setting.upload.url}`"
+        :method="setting.upload.method"
+        :show-file-list="false"
+        :on-success="handleUploadSuccess"
         multiple
       >
         <div class="flex flex-col items-center h-32 justify-center gap-4">
@@ -88,18 +91,35 @@
         <el-button class="absolute bottom-2 right-4 py-2" type="primary" @click="handleAddAssetsToSet">{{ t('global.save') }}</el-button>
       </div>
     </el-dialog>
+
+    <div class="w-full h-16 flex items-center flex-row-reverse bg-white pr-9">
+      <el-pagination
+        v-model:current-page="pageInfo.current"
+        v-model:page-size="pageInfo.size"
+        :total="pageInfo.total"
+        :pager-count="5"
+        layout="prev, pager, next, sizes"
+      />
+    </div>
   </div>
 </template>
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ElMessageBox } from 'element-plus';
+import { ElMessageBox, dayjs } from 'element-plus';
 import { Plus } from '@element-plus/icons-vue';
 import ImageItem from '@/components/ImageItem.vue';
+import { useGlobalStore } from '@/store';
+import { getAssetsList, saveAssetsItem, getAssetsSetList, saveAssetsSetList } from '@/api/system';
+import { getRequestFormConf } from '@/utils/tools';
+import get from 'lodash/get';
 import type { AssetsItemType } from '@/types/common.d';
+import JSON5 from 'json5';
 
 const { t } = useI18n();
 const i18nBase = 'page.AssetsManagement';
+
+const store = useGlobalStore();
 
 const activePanel = ref<string | number>('default');
 const isModunted = ref(false);
@@ -112,6 +132,18 @@ const selectedDataSet = ref<string[]>([]);
 const currentEditingIndex = ref<number>(-1);
 // 表格ref
 const tableRef = ref<any>(null);
+// 分页信息
+const pageInfo = ref({
+  current: 1,
+  size: 10,
+  total: 0,
+});
+
+const setting = computed(() => store.assetsSetting);
+
+const hasListApi = computed(() => !!setting.value?.list?.url);
+const hasDeleteApi = computed(() => !!setting.value?.delete?.url);
+const hasUpdateApi = computed(() => !!setting.value?.update?.url);
 
 assetsList.value.push({
   name: 'test',
@@ -133,7 +165,7 @@ const otherSetData = computed(() => {
   }
   return [];
 });
-
+// 添加新面板
 const handleAddNewPanel = () => {
   ElMessageBox.prompt(t(`${i18nBase}.addPanelModal.panelNamePlaceholder`), t(`${i18nBase}.addPanelModal.title`), {
     confirmButtonText: t(`${i18nBase}.addPanelModal.confirm`),
@@ -145,10 +177,11 @@ const handleAddNewPanel = () => {
   });
 };
 
+// 删除面板
 const handleRemovePanel = (index: number) => {
   panelList.value.splice(index, 1);
 };
-// 
+// 处理图片操作
 const handleImageAction = async (action: string, model: AssetsItemType, index: number) => {
   switch (action) {
     case 'favorite':
@@ -205,10 +238,65 @@ const afterTableShow = () => {
     }
   });
 };
+// 处理图片上传成功
+const handleUploadSuccess = (res: any, file: any) => {
+  console.log(res, file);
+  const conf = setting.value?.upload?.conf;
+  const confObj = JSON5.parse(conf ?? '{}');
+
+  const obj = {...res} as any;
+  const [ , fileName, extension ] = file.name.match?.(/^(\S+)\.(\w+)$/) ?? [ '' , '新文件', ''];
+  obj.type = file?.raw?.type;
+  if (Object.keys(confObj?.res?.map ?? {}).length) {
+    const { map } : {map: Record<string, string>} = confObj.res;
+    get(res, map.id) && (obj.id = get(res, map.id));
+    get(res, map.url) && (obj.url = get(res, map.url));
+    obj.name = get(res, map.name, fileName);
+    obj.extension = get(res, map.extension, extension);
+    obj.time = get(res, map.time, dayjs().format('YYYY-MM-DD HH:mm:ss'));
+  } else {
+    obj.name = obj.name ?? fileName;
+    obj.extension = obj.extension ?? extension;
+    obj.time = obj.time ?? dayjs().format('YYYY-MM-DD HH:mm:ss');
+  }
+  assetsList.value.unshift(obj);
+};
+
+// 获取图片列表
+const fetchAssetsList = async () => {
+  if (!hasListApi.value) {
+    const res = await getAssetsList();
+    assetsList.value = res?.data ?? [];
+    return;
+  } else {
+    const request = getRequestFormConf(setting.value.list.conf);
+    const res = await request(pageInfo.value);
+    assetsList.value = res?.list ?? [];
+    pageInfo.value.total = res?.total ?? 0;
+  }
+}; 
+
+// 获取数据集列表
+const fetchAssetsSetList = async () => {
+  const res = await getAssetsSetList();
+  panelList.value = res?.data ?? [];
+};
 
 onMounted(() => {
   isModunted.value = true;
+  fetchAssetsSetList();
+  fetchAssetsList();
 });
+
+watch(() => assetsList.value, () => {
+  if(!hasListApi.value) {
+    saveAssetsItem({assetsList: assetsList.value});
+  }
+}, {deep: true});
+
+watch(() => panelList.value, () => {
+  saveAssetsSetList({assetsSetList: panelList.value});
+}, {deep: true});
 
 </script>
 <style lang="scss">

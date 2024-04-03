@@ -10,6 +10,7 @@
         <SvgIcon v-if="actions.includes('delete')" class="text-white cursor-pointer absolute right-4 top-4" icon-name="trash" @click="$emit('action','delete', model, index)" />
         <SvgIcon v-if="actions.includes('addToSet')" class="text-white cursor-pointer absolute bottom-4 left-4" icon-name="addToAlbum" @click="$emit('action','addToSet', model, index)" />
         <SvgIcon v-if="actions.includes('outOfSet')" class="text-white cursor-pointer absolute top-4 left-4" icon-name="outOfAlbum" @click="$emit('action','outOfSet', model, index)" />
+        <SvgIcon class="text-white cursor-pointer absolute bottom-4 right-4" icon-name="copy" @click="handleCopyFileUrl" />
       </div>
   
       <img 
@@ -22,6 +23,7 @@
   </div>
 </template>
 <script setup lang="ts">
+import { ElMessage } from 'element-plus';
 import SvgIcon from './SvgIcon.vue';
 const actionTypeList = ['favorite', 'unfavorite', 'delete', 'addToSet', 'nameChange', 'outOfSet']  as const;
 type ActionType = typeof actionTypeList[number];
@@ -41,11 +43,19 @@ withDefaults(defineProps<ImageItemProps>(), {
   actions: () => ['favorite', 'unfavorite', 'delete', 'addToSet', 'nameChange'],
 });
 
-const model = defineModel({type: Object, required: true, default: (): ImageItemModelProps => ({
+const model = defineModel<ImageItemModelProps>({required: true, default: () => ({
   name: '',
   url: '',
   extension: '',
   isFavorited: false,
 })});
 defineEmits(['action']);
+
+const handleCopyFileUrl = () => {
+  navigator.clipboard.writeText(model.value.url).then(() => {
+    ElMessage.success('Copy success');
+  }).catch(() => {
+    ElMessage.error('Copy failed');
+  });
+};
 </script>

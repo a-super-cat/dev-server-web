@@ -33,7 +33,6 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     SceneItem: typeof import('./src/components/SceneItem.vue')['default']
     SearchBar: typeof import('./src/components/SearchBar.vue')['default']
-    Setting: typeof import('./src/components/Setting.vue')['default']
     SettingConf: typeof import('./src/components/SettingConf.vue')['default']
     SimpleAnimation: typeof import('./src/components/SimpleAnimation.vue')['default']
     SvgIcon: typeof import('./src/components/SvgIcon.vue')['default']

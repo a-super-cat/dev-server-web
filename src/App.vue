@@ -1,14 +1,21 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import { menuItems } from '@/utils/constants'
 import Setting from '@/components/SettingConf.vue'
 import router from './router';
 import type { MenuItem } from '@/types/common'
+import { setPageSetting, getPageSetting } from '@/api/system'
+import JSON5 from 'json5'
+import { ElMessage } from 'element-plus';
+import { getRequestFormConf } from '@/utils/tools'
+import { useGlobalStore } from './store';
 // @ts-ignore
 import zhCn from 'element-plus/dist/locale/zh-cn.js'
 // @ts-ignore
 import en from 'element-plus/dist/locale/en.js'
+
+const store = useGlobalStore();
 
 const needSettingPages = ['mock', 'assets'];
 
@@ -20,14 +27,14 @@ const locale = lang.toLocaleLowerCase().includes('zh') ? zhCn : en;
 
 // mock页面的配置数据
 const mockConf = ref({
-  usernameKey: 'username',
-  passwordKey: 'password',
   username: '',
   password: '',
   token: '',
   apiPath: '',
   authType: 'header',
   method: 'POST',
+  passwordEncryptType: 'MD5',
+  salt: '',
   conf: `{
   "auth": {
     "Authorization": "Bearer \${token}",
@@ -36,9 +43,7 @@ const mockConf = ref({
     "username": "username",
     "password": "password",
   },
-  "res": {
-    "token": "data.token",
-  }
+  "token": "data.token",
 }`,
   authKey: 'Authorization',
   authValuePartten: 'Bearer ${token}',
@@ -49,8 +54,11 @@ const assetsConf = ref({
   username: '',
   password: '',
   token: '',
+  apiPath: '',
   authType: 'header',
   method: 'POST',
+  passwordEncryptType: 'MD5',
+  salt: '',
   conf: `{
   "auth": {
     "Authorization": "Bearer \${token}",
@@ -59,9 +67,7 @@ const assetsConf = ref({
     "username": "username",
     "password": "password",
   },
-  "res": {
-    "token": "data.token",
-  }
+  "token": "data.token",
 }`,
   list: {
     url: '',
@@ -76,6 +82,7 @@ const assetsConf = ref({
   "res": {
     "map": {
       "total": "total",
+      "list": "data",
     },
     "itemMap": {
       "url": "imgUrl",
@@ -126,16 +133,73 @@ const handleMenuItemClick = (menuItem: MenuItem) => {
   router.push(path)
 }
 
-const handleSetMockDataSetting = () => {
-  console.log(mockConf.value)
-}
-const handleLogin = () => {
-  if(settingFor.value === 'mock') {
-    console.log('mock', mockConf.value)
+const handleLogin = async () => {
+  const info = settingFor.value === 'mock' ? mockConf.value : assetsConf.value;
+  await handleSaveSetting(true);
+  const loginFunc = getRequestFormConf({
+    passwordEncryptType: info.passwordEncryptType,
+    salt: info.salt,
+    api: info.apiPath,
+    conf: info.conf,
+    method: info.method,
+    authType: info.authType,
+  }, true);
+  const res = await loginFunc({
+    username: info.username,
+    password: info.password,
+  });
+  if(res.code === 200) {
+    ElMessage.success('登录成功');
   } else {
-    console.log('assets', assetsConf.value)
+    ElMessage.error('登录失败');
   }
 }
+
+// 保存配置 如果有token的话，保存的效果就等同登录了
+const handleSaveSetting = async (isLogin: boolean = false) => {
+  try {
+    const info = settingFor.value === 'mock' ? mockConf.value : assetsConf.value;
+    store.setSetting(settingFor.value, info);
+
+    const res = await setPageSetting({
+      settingFor: settingFor.value,
+      ...info,
+    });
+
+    if(isLogin !== true) {
+      if(res.code === 200) {
+        ElMessage.success('保存成功');
+        return true;
+      } else {
+        ElMessage.error('保存失败');
+        return false;
+      }
+    }
+  } catch (error) {
+    return false;
+  }
+}
+
+const handleGetSetting = async () => {
+  try {
+    const res = await getPageSetting();
+    if(res.code === 200) {
+      const { data } = res;
+      if(Object.keys(data.mock ?? {}).length) {
+        mockConf.value = data.mock;
+        store.setSetting('mock', data.mock);
+      }
+      if(Object.keys(data.assets ?? {}).length) {
+        assetsConf.value = data.assets;
+        store.setSetting('assets', data.assets);
+      }
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+onMounted(handleGetSetting);
 </script>
 
 <template>
@@ -175,8 +239,8 @@ const handleLogin = () => {
           {{ item }} Setting
         </div>
       </div>
-      <Setting v-if="settingFor === 'mock'" v-model="mockConf" setting-for="mock" @login="handleLogin" />
-      <Setting v-else setting-for="assets" v-model="assetsConf" @login="handleLogin" />
+      <Setting v-if="settingFor === 'mock'" v-model="mockConf" setting-for="mock" @login="handleLogin" @save="handleSaveSetting" />
+      <Setting v-else setting-for="assets" v-model="assetsConf" @login="handleLogin" @save="handleSaveSetting" />
     </el-dialog>
   </el-config-provider>
 </template>

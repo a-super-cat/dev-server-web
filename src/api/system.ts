@@ -3,6 +3,12 @@ const systemApiPrefix = '/mock-system';
 
 export const login = defineRequest(`${systemApiPrefix}/login`, 'POST');
 
+// 设置保存页面配置
+export const setPageSetting = defineRequest(`${systemApiPrefix}/savePageSetting`, 'POST');
+
+// 获取页面配置
+export const getPageSetting = defineRequest(`${systemApiPrefix}/getPageSetting`, 'GET');
+
 // 是否从请求中创建mockItem
 export const isCreateMockItemFromRequest = defineRequest(`${systemApiPrefix}/isCreateMockItemFromRequest`, 'GET');
 // 获取是否从请求中创建mockItem的布尔值
@@ -30,4 +36,12 @@ export const deleteSceneItem = defineRequest(`${systemApiPrefix}/deleteSceneItem
 // 选中场景
 export const selectSceneItem = defineRequest(`${systemApiPrefix}/selectSceneItem`, 'POST');
 
-export const testApi = defineRequest(`${systemApiPrefix}/test`, 'GET');
+// 获取静态资源列表
+export const getAssetsList = defineRequest(`${systemApiPrefix}/getAssetsList`, 'GET');
+// 保存静态资源列表
+export const saveAssetsItem = defineRequest(`${systemApiPrefix}/saveAssetsList`, 'POST');
+
+// 获取静态资源集列表
+export const getAssetsSetList = defineRequest(`${systemApiPrefix}/getAssetsSetList`, 'GET');
+// 保存静态资源集列表
+export const saveAssetsSetList = defineRequest(`${systemApiPrefix}/saveAssetsSetList`, 'POST');
