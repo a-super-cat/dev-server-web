@@ -3,7 +3,7 @@
     <div>
       <el-upload
         drag
-        :action="`/api/${setting.upload.url}`"
+        :action="setting.upload.url"
         :method="setting.upload.method"
         :show-file-list="false"
         :on-success="handleUploadSuccess"
