@@ -170,7 +170,7 @@ const handleSearch = (param: any) => {
 const handleIterationListChange = async (list: string[]) => {
   const res = await saveIterationList(list);
   if (res.code !== 200) {
-    ElMessage.error('迭代保存失败');
+    ElMessage.error(`${t('global.save')}${t('global.iteration')}: ${t('global.fail')}`);
   }
 };
 
@@ -180,7 +180,7 @@ const handleGetIterationList = async () => {
   if (res.code === 200) {
     iterationList.value = res.data;
   } else {
-    ElMessage.error('获取迭代列表失败');
+    ElMessage.error(`${t('global.get')}${t('global.iteration')}: ${t('global.fail')}`);
   }
 };
 
@@ -219,7 +219,7 @@ const handleMockItemSceneOperation = async (operation: string, mockItemBasicInfo
       {
         const sceneItemResponseConf = await getSceneItemResponseConf({mockItemId: mockItemBasicInfo.id, sceneId: sceneItem.id});
         if (!sceneItemResponseConf.data) {
-          ElMessage.error('获取场景配置失败');
+          ElMessage.error(`${t('global.get')}${t('global.scene')}${t('global.config')}: ${t('global.fail')}`);
           return;
         }
         currentEditingSceneItem.value = {
@@ -233,10 +233,10 @@ const handleMockItemSceneOperation = async (operation: string, mockItemBasicInfo
       {
         const res = await deleteSceneItem({mockItemId: mockItemBasicInfo.id, sceneId: sceneItem.id});
         if (res.code === 200) {
-          ElMessage.success('删除成功');
+          ElMessage.success(`${t('global.delete')}: ${t('global.success')}`);
           handleAfterChangeMockItemScene(mockItemBasicInfo.id, res.data);
         } else {
-          ElMessage.error(`删除失败 ${res.msg}`);
+          ElMessage.error(`${t('global.delete')}${t('global.fail')} ${res.msg}`);
         }
       }
       break;
@@ -252,7 +252,7 @@ const handleSaveSceneItem = async (isCloseCodeEditor = false) => {
     mockItemId: currentEditingMockItemBaseInfo.value.id,
   });
   if (res.code === 200) {
-    ElMessage.success('保存成功');
+    ElMessage.success(`${t('global.save')}: ${t('global.success')}`);
     const item = res.data.find((item: any) => item.id === currentEditingSceneItem.value.id);
     if (item) {
       currentEditingSceneItem.value = item;
@@ -262,7 +262,7 @@ const handleSaveSceneItem = async (isCloseCodeEditor = false) => {
     }
     handleAfterChangeMockItemScene(currentEditingMockItemBaseInfo.value.id, res.data);
   } else {
-    ElMessage.error(`保存失败 ${res.msg}`);
+    ElMessage.error(`${t('global.save')}${t('global.fail')} ${res.msg}`);
   }
 };
 
@@ -329,7 +329,7 @@ const handleGetMockList = async () => {
     }
     pageInfo.value = { ...pageInfo.value, ...pageInfo };
   } else {
-    ElMessage.error('获取mock列表失败');
+    ElMessage.error(`${t('gloabl.get')}Mock${t('global.list')}: ${t('global.fail')}`);
   }
 };
 
@@ -337,10 +337,10 @@ const handleGetMockList = async () => {
 const handleSaveMockItem = async (mockItemBase: MockItemBasicType) => {
   const res = await saveMockItem(mockItemBase);
   if (res.data) {
-    ElMessage.success('保存成功');
+    ElMessage.success(`${t('global.save')}: ${t('global.success')}`);
     handleGetMockList();
   } else {
-    ElMessage.error('保存失败');
+    ElMessage.error(`${t('global.save')}: ${t('global.fail')}`);
   }
 };
 
@@ -348,10 +348,10 @@ const handleSaveMockItem = async (mockItemBase: MockItemBasicType) => {
 const handleDeleteMockItem = async (mockItemId: string) => {
   const res = await deleteMockItem({id: mockItemId});
   if (res.code === 200) {
-    ElMessage.success('删除成功');
+    ElMessage.success( `${t('global.delete')}: ${t('global.success')}`);
     handleGetMockList();
   } else {
-    ElMessage.error('删除失败');
+    ElMessage.error(`${t('global.delete')}: ${t('global.fail')}`);
   }
 };
 
@@ -371,7 +371,7 @@ const handleMockFromRequestChange = async () => {
   if (res.code === 200) {
     isMockItemFromRequest.value = res.data;
   } else {
-    ElMessage.error('操作失败');
+    ElMessage.error(t('global.fail'));
   }
 };
 

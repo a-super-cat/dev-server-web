@@ -1,7 +1,7 @@
 <template>
-  <div class=" bg-blue-300 rounded-md overflow-hidden">
-    <div class="w-48 border-blue-400 box-border p-1">
-      <input v-model="model.name" class="outline-none text-white bg-blue-300 pl-4" @change="$emit('action', 'nameChange', model, index)" />
+  <div class="bg-white shadow-md shadow-gray-300 rounded-md">
+    <div class="box-border p-1">
+      <input v-model="model.name" class="outline-none text-center text-gray-600 pl-4" @change="$emit('action', 'nameChange', model, index)" />
     </div>
     <div class="w-48 h-36 group/img relative rounded-md overflow-hidden">
       <div class="hidden absolute left-0 top-0 group-hover/img:block bg-black bg-opacity-60 w-full h-full box-border">
@@ -14,17 +14,19 @@
       </div>
   
       <img 
-        :src="model.url" 
+        :src="icon === 'image' ? model.url : icon" 
         :alt="model.name"
-        class="w-full h-full object-cover border-none block"
+        :class="{'w-full h-full border-none block': true, 'object-cover': icon === 'image', 'object-contain': icon !== 'image'}"
         style="object-position: center top" 
       />
     </div>
   </div>
 </template>
 <script setup lang="ts">
+import { computed } from 'vue';
 import { ElMessage } from 'element-plus';
 import SvgIcon from './SvgIcon.vue';
+import { getAssetsIcon } from '@/utils/tools'
 const actionTypeList = ['favorite', 'unfavorite', 'delete', 'addToSet', 'nameChange', 'outOfSet']  as const;
 type ActionType = typeof actionTypeList[number];
 interface ImageItemModelProps {
@@ -38,6 +40,8 @@ interface ImageItemProps {
   actions?: Array<ActionType>;
 }
 
+defineEmits(['action']);
+
 withDefaults(defineProps<ImageItemProps>(), {
   index: 0,
   actions: () => ['favorite', 'unfavorite', 'delete', 'addToSet', 'nameChange'],
@@ -49,7 +53,8 @@ const model = defineModel<ImageItemModelProps>({required: true, default: () => (
   extension: '',
   isFavorited: false,
 })});
-defineEmits(['action']);
+
+const icon = computed(() => getAssetsIcon(model.value.extension));
 
 const handleCopyFileUrl = () => {
   navigator.clipboard.writeText(model.value.url).then(() => {

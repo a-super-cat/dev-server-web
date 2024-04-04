@@ -6,7 +6,7 @@ import Setting from '@/components/SettingConf.vue'
 import router from './router';
 import type { MenuItem } from '@/types/common'
 import { setPageSetting, getPageSetting } from '@/api/system'
-import JSON5 from 'json5'
+import { useI18n } from 'vue-i18n';
 import { ElMessage } from 'element-plus';
 import { getRequestFormConf } from '@/utils/tools'
 import { useGlobalStore } from './store';
@@ -14,6 +14,8 @@ import { useGlobalStore } from './store';
 import zhCn from 'element-plus/dist/locale/zh-cn.js'
 // @ts-ignore
 import en from 'element-plus/dist/locale/en.js'
+
+const { t } = useI18n();
 
 const store = useGlobalStore();
 
@@ -149,9 +151,9 @@ const handleLogin = async () => {
     password: info.password,
   });
   if(res.code === 200) {
-    ElMessage.success('登录成功');
+    ElMessage.success(`${t('global.login')}:${t('global.success')}`);
   } else {
-    ElMessage.error('登录失败');
+    ElMessage.error(`${t('global.login')}:${t('global.failed')}`);
   }
 }
 
@@ -168,10 +170,10 @@ const handleSaveSetting = async (isLogin: boolean = false) => {
 
     if(isLogin !== true) {
       if(res.code === 200) {
-        ElMessage.success('保存成功');
+        ElMessage.success(`${t('global.save')}:${t('global.success')}`);
         return true;
       } else {
-        ElMessage.error('保存失败');
+        ElMessage.error(`${t('global.save')}:${t('global.failed')}`);
         return false;
       }
     }

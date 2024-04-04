@@ -1,5 +1,5 @@
 <template >
-  <div class="p-4 flex flex-col min-h-full">
+  <div class="p-4 flex flex-col min-h-full assets-page">
     <div>
       <el-upload
         drag
@@ -106,13 +106,14 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ElMessageBox, dayjs } from 'element-plus';
+import { ElMessage, ElMessageBox, dayjs } from 'element-plus';
 import { Plus } from '@element-plus/icons-vue';
 import ImageItem from '@/components/ImageItem.vue';
 import { useGlobalStore } from '@/store';
 import { getAssetsList, saveAssetsItem, getAssetsSetList, saveAssetsSetList } from '@/api/system';
 import { getRequestFormConf } from '@/utils/tools';
 import get from 'lodash/get';
+import debounced from 'lodash/debounce';
 import type { AssetsItemType } from '@/types/common.d';
 import JSON5 from 'json5';
 
@@ -181,41 +182,6 @@ const handleAddNewPanel = () => {
 const handleRemovePanel = (index: number) => {
   panelList.value.splice(index, 1);
 };
-// 处理图片操作
-const handleImageAction = async (action: string, model: AssetsItemType, index: number) => {
-  switch (action) {
-    case 'favorite':
-      assetsList.value[index].isFavorited = true;
-      console.log('favorite', model);
-      break;
-    case 'unfavorite':
-      if (activePanel.value === 'default') {
-        assetsList.value[index].isFavorited = false;
-      } else {
-        favoritedList.value[index].isFavorited = false;
-      }
-      console.log('unfavorite', model);
-      break;
-    case 'delete':
-      assetsList.value = assetsList.value.filter(item => item.url !== model.url);
-      console.log('delete', model);
-      break;
-    case 'addToSet':
-      currentEditingIndex.value = index;
-      dialogTableVisible.value = true;
-      console.log('addToSet', model, index);
-      break;
-    case 'outOfSet':
-      model.fileSet = model.fileSet?.filter(item => item !== panelList.value[activePanel.value as any]);
-      console.log('outOfSet', model);
-      break;
-    case 'nameChange':
-      console.log('nameChange', model);
-      break;
-    default:
-      break;
-  }
-};
 
 const handleTableSelectionChange = (selection: {panel: string}[]) => {
   selectedDataSet.value = selection.map(item => item.panel);
@@ -245,7 +211,7 @@ const handleUploadSuccess = (res: any, file: any) => {
   const confObj = JSON5.parse(conf ?? '{}');
 
   const obj = {...res} as any;
-  const [ , fileName, extension ] = file.name.match?.(/^(\S+)\.(\w+)$/) ?? [ '' , '新文件', ''];
+  const [ , fileName, extension ] = file.name?.match(/^([^.*]+)\.(\w+)$/) ?? [ '' , '新文件', ''];
   obj.type = file?.raw?.type;
   if (Object.keys(confObj?.res?.map ?? {}).length) {
     const { map } : {map: Record<string, string>} = confObj.res;
@@ -276,6 +242,72 @@ const fetchAssetsList = async () => {
   }
 }; 
 
+// 删除图片
+const handleDelete = async (item: any) => {
+  if (!hasDeleteApi.value) {
+    assetsList.value = assetsList.value.filter(file => file.url !== item.url);
+    return;
+  } else {
+    const deleteAssetsFunc = getRequestFormConf({api: setting.value.delete.url, method: setting.value.delete.method, conf: setting.value.delete.conf});
+    const res = await deleteAssetsFunc(item);
+    if (res.code === 200) {
+      ElMessage.success(`${t('global.delete')} ${t('global.success')}`);
+    } else {
+      ElMessage.error(`${t('global.delete')} ${t('global.fail')}`);
+    }
+  }
+};
+
+// 更新图片信息
+const handleUpdate = async (item: any) => {
+  if (!hasUpdateApi.value) {
+    return;
+  } else {
+    const updateAssetsFunc = getRequestFormConf({api: setting.value.update.url, method: setting.value.update.method, conf: setting.value.update.conf});
+    const res = await updateAssetsFunc(item);
+    if (res.code === 200) {
+      ElMessage.success(`${t('global.update')} ${t('global.success')}`);
+    } else {
+      ElMessage.error(`${t('global.update')} ${t('global.fail')}`);
+    }
+  }
+};
+
+// 处理图片操作
+const handleImageAction = async (action: string, model: AssetsItemType, index: number) => {
+  switch (action) {
+    case 'favorite':
+      assetsList.value[index].isFavorited = true;
+      console.log('favorite', model);
+      break;
+    case 'unfavorite':
+      if (activePanel.value === 'default') {
+        assetsList.value[index].isFavorited = false;
+      } else {
+        favoritedList.value[index].isFavorited = false;
+      }
+      console.log('unfavorite', model);
+      break;
+    case 'delete':
+      handleDelete(model);
+      break;
+    case 'addToSet':
+      currentEditingIndex.value = index;
+      dialogTableVisible.value = true;
+      console.log('addToSet', model, index);
+      break;
+    case 'outOfSet':
+      model.fileSet = model.fileSet?.filter(item => item !== panelList.value[activePanel.value as any]);
+      console.log('outOfSet', model);
+      break;
+    case 'nameChange':
+      handleUpdate(model);
+      break;
+    default:
+      break;
+  }
+};
+
 // 获取数据集列表
 const fetchAssetsSetList = async () => {
   const res = await getAssetsSetList();
@@ -288,6 +320,8 @@ onMounted(() => {
   fetchAssetsList();
 });
 
+const debouncedSaveAssetsSetList = debounced(saveAssetsSetList, 3000);
+
 watch(() => assetsList.value, () => {
   if(!hasListApi.value) {
     saveAssetsItem({assetsList: assetsList.value});
@@ -295,10 +329,14 @@ watch(() => assetsList.value, () => {
 }, {deep: true});
 
 watch(() => panelList.value, () => {
-  saveAssetsSetList({assetsSetList: panelList.value});
+  debouncedSaveAssetsSetList({assetsSetList: panelList.value});
 }, {deep: true});
 
 </script>
 <style lang="scss">
-  
+  .assets-page {
+    .el-tabs__content {
+      overflow: visible !important;
+    }
+  }
 </style>

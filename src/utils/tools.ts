@@ -4,6 +4,19 @@ import get from 'lodash/get';
 import set from 'lodash/set';
 import crypto from 'crypto-js';
 
+import {
+  docIcon,
+  fileIcon,
+  mp3Icon,
+  pdfIcon,
+  pptIcon,
+  textIcon,
+  videoIcon,
+  xlsIcon,
+  zipIcon,
+} from '@/utils/constants';
+
+
 export const getRequestFormConf = (conf: { 
   api: string, 
   passwordEncryptType?: string,
@@ -13,6 +26,8 @@ export const getRequestFormConf = (conf: {
   authType?: string 
 }, isLogin: boolean = false) => async (param: any) => {
   const confObj = JSON5.parse(conf.conf);
+  const pathParamKey =  conf.api.match(/\$\{(\S+)\}/)?.[1] ?? '';
+  const formattedApi = conf.api.replace((/\$\{\w+\}/g), get(param, pathParamKey, ''))
   if(isLogin) {
     const { logInfoMap } = confObj;
     const requestData = {} as any;
@@ -30,7 +45,7 @@ export const getRequestFormConf = (conf: {
       });
     }
 
-    const res = await defineRequest(conf.api, conf.method)(requestData);
+    const res = await defineRequest(formattedApi, conf.method)(requestData);
 
     const resultData = {} as any;
     if(Object.keys(resultMap).length) {
@@ -58,3 +73,20 @@ export const getRequestFormConf = (conf: {
     return resultData;
   }
 }
+
+
+export const extension2IconMap = {
+  'png,jpg,jpeg,gif': 'image',
+  'doc,docx': docIcon,
+  'xls,xlsx': xlsIcon,
+  'ppt,pptx': pptIcon,
+  'pdf': pdfIcon,
+  'zip,rar': zipIcon,
+  'txt,text': textIcon,
+  'mp3': mp3Icon,
+  'mp4, rmvb, avi, wmv, 3gp, mkv': videoIcon,
+};
+export const getAssetsIcon = (extension: string) => {
+  const entry = Object.entries(extension2IconMap).find(([key]) => key.includes(extension));
+  return entry ? entry[1] : fileIcon;
+};

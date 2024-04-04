@@ -3,16 +3,16 @@
       <el-form label-width="72px" class="pt-6 px-4">
         <el-form-item >
           <div class="flex flex-row-reverse w-full gap-4">
-            <el-button :disabled="!!confData.token" type="primary" @click="$emit('login', confData)">登录</el-button>
-            <el-button type="primary" @click="$emit('save', confData)">保存</el-button>
+            <el-button :disabled="!!confData.token" type="primary" @click="$emit('login', confData)">{{ t('global.login') }}</el-button>
+            <el-button type="primary" @click="$emit('save', confData)">{{ t('global.save') }}</el-button>
           </div>
         </el-form-item>
         <div class="grid grid-cols-2">
-          <el-form-item label="用户名">
+          <el-form-item :label="t('global.username')">
             <el-input v-model="confData.username" />
           </el-form-item>
 
-          <el-form-item label="密码">
+          <el-form-item :label="t('global.password')">
             <el-input v-model="confData.password">
               <template #append>
                 <div class="flex gap-6">
@@ -30,7 +30,7 @@
           </el-form-item>
 
           <div class="col-span-2">
-            <el-form-item label="登录地址">
+            <el-form-item :label="t('global.loginApi')">
               <div class="flex w-full">
                 <el-input class="flex-1" v-model="confData.apiPath">
                   <template #append>
@@ -65,7 +65,7 @@
         </div>
 
         
-        <el-form-item label="授权设置">
+        <el-form-item :label="t('global.authConf')">
           <RequestResponseConf v-model="confData.conf" />
         </el-form-item>
 
