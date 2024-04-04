@@ -36,6 +36,7 @@ export const getRequestFormConf = (conf: {
     requestData[logInfoMap.password ?? 'password'] = crypto?.[conf.passwordEncryptType](param.password, conf.salt).toString();
     return await defineRequest(conf.api, conf.method)(requestData);
   } else {
+    console.log('some11111-----', confObj, conf, formattedApi);
     const paramMap: Record<string, string> = confObj?.req?.map ?? {};
     const resultMap: Record<string, string> = confObj?.res?.map ?? {};
     const requestData = {} as Record<string, string>;
