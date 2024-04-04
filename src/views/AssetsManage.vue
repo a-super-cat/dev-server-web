@@ -146,18 +146,6 @@ const hasListApi = computed(() => !!setting.value?.list?.url);
 const hasDeleteApi = computed(() => !!setting.value?.delete?.url);
 const hasUpdateApi = computed(() => !!setting.value?.update?.url);
 
-assetsList.value.push({
-  name: 'test',
-  url: 'https://i.postimg.cc/PqS1T023/89.jpg',
-  extension: 'jpg',
-},
-  {
-    name: '风景',
-    url: 'https://i.postimg.cc/7Y9jnxVt/12.jpg',
-    extension: 'jpg',
-  }
-);
-
 const favoritedList = computed(() => assetsList.value.filter(item => item.isFavorited));
 
 const otherSetData = computed(() => {
