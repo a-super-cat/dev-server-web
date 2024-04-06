@@ -99,5 +99,6 @@ export default {
     responseConfig: '返回值配置',
     sceneName: '场景名',
     iteration: '迭代期',
+    systemSetting: '系统设置',
   },
 }

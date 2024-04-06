@@ -4,18 +4,6 @@ import get from 'lodash/get';
 import set from 'lodash/set';
 import crypto from 'crypto-js';
 
-import {
-  docIcon,
-  fileIcon,
-  mp3Icon,
-  pdfIcon,
-  pptIcon,
-  textIcon,
-  videoIcon,
-  xlsIcon,
-  zipIcon,
-} from '@/utils/constants';
-
 
 export const getRequestFormConf = (conf: { 
   api: string, 
@@ -36,7 +24,6 @@ export const getRequestFormConf = (conf: {
     requestData[logInfoMap.password ?? 'password'] = crypto?.[conf.passwordEncryptType](param.password, conf.salt).toString();
     return await defineRequest(conf.api, conf.method)(requestData);
   } else {
-    console.log('some11111-----', confObj, conf, formattedApi);
     const paramMap: Record<string, string> = confObj?.req?.map ?? {};
     const resultMap: Record<string, string> = confObj?.res?.map ?? {};
     const requestData = {} as Record<string, string>;
@@ -74,20 +61,3 @@ export const getRequestFormConf = (conf: {
     return resultData;
   }
 }
-
-
-export const extension2IconMap = {
-  'png,jpg,jpeg,gif': 'image',
-  'doc,docx': docIcon,
-  'xls,xlsx': xlsIcon,
-  'ppt,pptx': pptIcon,
-  'pdf': pdfIcon,
-  'zip,rar': zipIcon,
-  'txt,text': textIcon,
-  'mp3': mp3Icon,
-  'mp4, rmvb, avi, wmv, 3gp, mkv': videoIcon,
-};
-export const getAssetsIcon = (extension: string) => {
-  const entry = Object.entries(extension2IconMap).find(([key]) => key.includes(extension));
-  return entry ? entry[1] : fileIcon;
-};

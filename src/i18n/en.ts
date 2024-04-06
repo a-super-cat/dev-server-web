@@ -99,5 +99,6 @@ export default {
     responseConfig: 'responseConfig',
     sceneName: 'scene name',
     iteration: 'Iteration',
+    systemSetting: 'System Setting',
   },
 }

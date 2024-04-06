@@ -19,10 +19,7 @@ const { t } = useI18n();
 
 const store = useGlobalStore();
 
-const needSettingPages = ['mock', 'assets'];
-
 const isShow = ref<boolean>(false);
-const settingFor = ref<string>('mock');
 const lang = Intl.DateTimeFormat().resolvedOptions().locale;
 const locale = lang.toLocaleLowerCase().includes('zh') ? zhCn : en;
 
@@ -51,84 +48,6 @@ const mockConf = ref({
   authValuePartten: 'Bearer ${token}',
 });
 
-// 静态资源页面的配置数据
-const assetsConf = ref({
-  username: '',
-  password: '',
-  token: '',
-  apiPath: '',
-  authType: 'header',
-  method: 'POST',
-  passwordEncryptType: 'MD5',
-  salt: '',
-  conf: `{
-  "auth": {
-    "Authorization": "Bearer \${token}",
-  },
-  "logInfoMap": {
-    "username": "username",
-    "password": "password",
-  },
-  "token": "data.token",
-}`,
-  list: {
-    url: '',
-    method: 'POST',
-    conf: `{
-  "req": {
-    "map": {
-      "current": "current",
-      "size": "size",
-    }
-  },
-  "res": {
-    "map": {
-      "total": "total",
-      "list": "data",
-    },
-    "itemMap": {
-      "url": "imgUrl",
-      "time": "date",
-      "name": "name",
-      "extension": "extension"
-    }
-  }
-}`,
-  },
-  upload: {
-    url: '',
-    method: 'POST',
-    conf: `{
-  "res": {
-    "map": {
-      "id": "id",
-      "url": "data",
-      "name": "name",
-      "extension": "extension",
-      "time": "date",
-    }
-  }
-}`,
-  },
-  delete: {
-    url: '',
-    method: 'GET',
-    conf: `{
-  "res": {
-    "result": "data"
-  }
-}`,
-  },
-  update: {
-    url: '',
-    method: 'POST',
-    conf: `{
-  "res": {
-    "result": "data"
-  }
-}`,
-  }
-});
 
 const handleMenuItemClick = (menuItem: MenuItem) => {
   const { path } = menuItem;
@@ -136,7 +55,7 @@ const handleMenuItemClick = (menuItem: MenuItem) => {
 }
 
 const handleLogin = async () => {
-  const info = settingFor.value === 'mock' ? mockConf.value : assetsConf.value;
+  const info =  mockConf.value;
   await handleSaveSetting(true);
   const loginFunc = getRequestFormConf({
     passwordEncryptType: info.passwordEncryptType,
@@ -160,13 +79,7 @@ const handleLogin = async () => {
 // 保存配置 如果有token的话，保存的效果就等同登录了
 const handleSaveSetting = async (isLogin: boolean = false) => {
   try {
-    const info = settingFor.value === 'mock' ? mockConf.value : assetsConf.value;
-    store.setSetting(settingFor.value, info);
-
-    const res = await setPageSetting({
-      settingFor: settingFor.value,
-      ...info,
-    });
+    const res = await setPageSetting(mockConf.value);
 
     if(isLogin !== true) {
       if(res.code === 200) {
@@ -187,13 +100,9 @@ const handleGetSetting = async () => {
     const res = await getPageSetting();
     if(res.code === 200) {
       const { data } = res;
-      if(Object.keys(data.mock ?? {}).length) {
-        mockConf.value = data.mock;
-        store.setSetting('mock', data.mock);
-      }
-      if(Object.keys(data.assets ?? {}).length) {
-        assetsConf.value = data.assets;
-        store.setSetting('assets', data.assets);
+      if(Object.keys(data ?? {}).length) {
+        mockConf.value = data;
+        store.setSetting(data);
       }
     }
   } catch (error) {
@@ -224,7 +133,7 @@ onMounted(handleGetSetting);
             @click="isShow = true"
           >
             <SvgIcon class="text-gray-200 scale-125" icon-name="setting" />
-            设置
+            {{ t('global.systemSetting') }}
           </div>
         </div>
       </div>
@@ -232,17 +141,8 @@ onMounted(handleGetSetting);
         <RouterView />
       </div>
     </div>
-    <el-dialog v-model="isShow" title="系统配置" width="960px">
-      <div class="flex max-h-[60vh]">
-        <div v-for="item in needSettingPages" :key="item" 
-          :class="{'flex-1 box-border text-center cursor-pointer p-2': true, 'border': item !== settingFor, 'bg-primary-light text-white': item===settingFor}"
-          @click="settingFor = item"
-        >
-          {{ item }} Setting
-        </div>
-      </div>
-      <Setting v-if="settingFor === 'mock'" v-model="mockConf" setting-for="mock" @login="handleLogin" @save="handleSaveSetting" />
-      <Setting v-else setting-for="assets" v-model="assetsConf" @login="handleLogin" @save="handleSaveSetting" />
+    <el-dialog v-model="isShow" :title="t('global.systemSetting')" width="960px">
+      <Setting v-model="mockConf" setting-for="mock" @login="handleLogin" @save="handleSaveSetting" />
     </el-dialog>
   </el-config-provider>
 </template>
