@@ -203,7 +203,7 @@ const handleMockItemSceneOperation = async (operation: string, mockItemBasicInfo
         name: '场景名',
         iteration: iterationList.value[0] ?? '',
         param: '{\r\n  \r\n}',
-        responseConf: 'export default (param: {name: string, age: number}) => {\r\n  \r\n}',
+        responseConf: 'export default (param: any) => {\r\n  \r\n}',
       };
       isShowCodeEditor.value = true;
       break;
