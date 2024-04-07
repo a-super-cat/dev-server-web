@@ -98,6 +98,8 @@ export default {
     param: 'param',
     responseConfig: 'responseConfig',
     sceneName: 'scene name',
+    apiName: 'api name',
+    apiRemarks: 'api remarks',
     iteration: 'Iteration',
     systemSetting: 'System Setting',
   },

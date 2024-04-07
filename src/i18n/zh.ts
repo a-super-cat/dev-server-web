@@ -98,6 +98,8 @@ export default {
     param: '参数',
     responseConfig: '返回值配置',
     sceneName: '场景名',
+    apiName: '接口名',
+    apiRemarks: '接口备注',
     iteration: '迭代期',
     systemSetting: '系统设置',
   },

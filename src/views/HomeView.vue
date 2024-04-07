@@ -200,7 +200,7 @@ const handleMockItemSceneOperation = async (operation: string, mockItemBasicInfo
     case 'add':
       currentEditingSceneItem.value = {
         id: uuid(),
-        name: '场景名',
+        name: t('global.sceneName'),
         iteration: iterationList.value[0] ?? '',
         param: '{\r\n  \r\n}',
         responseConf: 'export default (param: any) => {\r\n  \r\n}',
@@ -289,9 +289,9 @@ const handleAddMockItem = () => {
     basicInfo: {
       id: uuid(),
       path: '',
-      name: '接口名',
+      name: t('global.apiName'),
       type: 'HTTP',
-      remarks: '接口备注',
+      remarks: t('global.apiRemarks'),
       requestMethod: 'GET',
       mockPattern: 'mock',
     },
@@ -318,9 +318,9 @@ const handleGetMockList = async () => {
         basicInfo: {
           id: uuid(),
           path: '',
-          name: '接口名',
+          name: t('global.apiName'),
           type: 'HTTP',
-          remarks: '接口备注',
+          remarks: t('global.apiRemarks'),
           requestMethod: 'GET',
           mockPattern: 'mock',
         },
