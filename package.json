@@ -1,6 +1,6 @@
 {
   "name": "@easily-tools/mock-server-web",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "files": [
     "dist"
   ],

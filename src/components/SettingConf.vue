@@ -1,6 +1,6 @@
 <template >
   <div>
-      <el-form label-width="72px" class="pt-6 px-4">
+      <el-form label-width="96px" class="pt-6 px-4">
         <el-form-item >
           <div class="flex flex-row-reverse w-full gap-4">
             <el-button :disabled="!!confData.token" type="primary" @click="$emit('login', confData)">{{ t('global.login') }}</el-button>
