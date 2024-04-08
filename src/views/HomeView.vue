@@ -249,7 +249,6 @@ const handleMockItemSceneOperation = async (operation: string, mockItemBasicInfo
 
 // 保存场景
 const handleSaveSceneItem = async (isCloseCodeEditor = false) => {
-  console.log('some00000000', {...currentEditingSceneItem.value, mockItemId: currentEditingMockItemBaseInfo.value.id})
   const res = await saveSceneItem({
     ...currentEditingSceneItem.value,
     mockItemId: currentEditingMockItemBaseInfo.value.id,
@@ -258,7 +257,6 @@ const handleSaveSceneItem = async (isCloseCodeEditor = false) => {
     ElMessage.success(`${t('global.save')}: ${t('global.success')}`);
     const item = res.data.find((item: any) => item.id === currentEditingSceneItem.value.id);
     if (item) {
-    console.log('some-----', res);
       currentEditingSceneItem.value = item;
     }
     if (isCloseCodeEditor) {

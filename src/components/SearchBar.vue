@@ -111,7 +111,7 @@ const handleDeleteIterationTag = (tag: any) => {
   if(!newIterationList.includes(param.value.iteration)) {
     param.value.iteration = '';
   }
-  componentEvent('iterationListChange', iterationList.value);
+  componentEvent('iterationListChange', newIterationList);
 };
 
 watch(() => props.mockFromRequest, (value) => {
