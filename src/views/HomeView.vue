@@ -168,7 +168,7 @@ const handleSearch = (param: any) => {
 
 // 保存迭代期列表
 const handleIterationListChange = async (list: string[]) => {
-  const res = await saveIterationList(list);
+  const res = await saveIterationList({list});
   if (res.code !== 200) {
     ElMessage.error(`${t('global.save')}${t('global.iteration')}: ${t('global.fail')}`);
   }
@@ -203,6 +203,8 @@ const handleMockItemSceneOperation = async (operation: string, mockItemBasicInfo
         name: t('global.sceneName'),
         iteration: iterationList.value[0] ?? '',
         param: '{\r\n  \r\n}',
+        requestMethod: 'GET',
+        type: 'HTTP',
         responseConf: 'export default (param: any) => {\r\n  \r\n}',
       };
       isShowCodeEditor.value = true;
@@ -247,6 +249,7 @@ const handleMockItemSceneOperation = async (operation: string, mockItemBasicInfo
 
 // 保存场景
 const handleSaveSceneItem = async (isCloseCodeEditor = false) => {
+  console.log('some00000000', {...currentEditingSceneItem.value, mockItemId: currentEditingMockItemBaseInfo.value.id})
   const res = await saveSceneItem({
     ...currentEditingSceneItem.value,
     mockItemId: currentEditingMockItemBaseInfo.value.id,
@@ -255,6 +258,7 @@ const handleSaveSceneItem = async (isCloseCodeEditor = false) => {
     ElMessage.success(`${t('global.save')}: ${t('global.success')}`);
     const item = res.data.find((item: any) => item.id === currentEditingSceneItem.value.id);
     if (item) {
+    console.log('some-----', res);
       currentEditingSceneItem.value = item;
     }
     if (isCloseCodeEditor) {

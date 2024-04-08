@@ -84,6 +84,11 @@ onMounted(() => {
     });
   }
 
+  // 如果是ts，添加全员变量
+  if(props.language === 'typescript') {
+    monaco.languages.typescript.typescriptDefaults.addExtraLib(`declare const pathParams: string[];`);
+  }
+
   // 数据绑定
   monacoEditor.getModel()?.onDidChangeContent(() => {
     const value = monacoEditor.getValue();
